@@ -1,0 +1,4 @@
+// the configured options and settings for Tutorial
+// #define TeenyTinyBits_VERSION_MAJOR @TeenyTinyBits_VERSION_MAJOR@
+// #define TeenyTinyBits_VERSION_MINOR @TeenyTinyBits_VERSION_MINOR@
+// #define TeenyTinyBits_VERSION_PATCH @TeenyTinyBits_VERSION_PATCH@
