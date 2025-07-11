@@ -7,11 +7,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # configure_file(${PROJECT_SOURCE_DIR}/constants.hpp ${PROJECT_BINARY_DIR}/constants.hpp)
 # configure_file(${PROJECT_SOURCE_DIR}/constants.hpp.in ${PROJECT_BINARY_DIR}/constants.hpp)
-configure_file(${PROJECT_SOURCE_DIR}/constants.hpp.in ${PROJECT_BINARY_DIR}/constants.hpp)
+configure_file(${PROJECT_SOURCE_DIR}/scripts/constants.hpp.in ${PROJECT_BINARY_DIR}/constants.hpp)
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/scripts/main.cpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
-                           "${PROJECT_SOURCE_DIR}"
+                           "${PROJECT_SOURCE_DIR}/scripts"
                            "${PROJECT_BINARY_DIR}"
                            )
