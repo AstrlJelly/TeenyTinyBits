@@ -1,1 +1,3 @@
-bash ./build.sh && ./build/TeenyTinyBits
+bash ./build.sh
+printf "\n"
+./build/TeenyTinyBits
