@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ ! ( "./build.sh" ) ]]; then
+if [[ !  ]]; then
   printf "\n"
   ./build/TeenyTinyBits
 fi

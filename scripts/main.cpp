@@ -1,7 +1,4 @@
-#include <iostream>
-#include <stdio.h>
-
-#include "constants.hpp"
+#include "./main.hpp"
 
 int main(void)
 {
