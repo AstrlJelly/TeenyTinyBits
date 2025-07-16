@@ -1,11 +1,11 @@
 #pragma once
 
 // std library
-#include <iostream>
+#include <iostream> // IWYU pragma: keep
 #include <cstdio>
 
 // include directories
-#include <GLAD/glad.h> 
+#include <glad/glad.h> 
 #include <GLFW/glfw3.h>
 
 // project headers

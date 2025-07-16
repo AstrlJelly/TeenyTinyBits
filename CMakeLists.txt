@@ -9,9 +9,10 @@ set(PROJECT_SCRIPTS_DIR ${PROJECT_SOURCE_DIR}/scripts)
 configure_file(${PROJECT_SCRIPTS_DIR}/constants.hpp.in ${PROJECT_BINARY_DIR}/constants.hpp)
 
 add_executable(${PROJECT_NAME} 
-    include/GLAD/glad.c
+    include/glad/glad.c
     ${PROJECT_SCRIPTS_DIR}/main.cpp)
 
+add_subdirectory(include/glm)
 add_subdirectory(include/GLFW)
 find_package(OpenGL REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC glfw OpenGL::GL)
