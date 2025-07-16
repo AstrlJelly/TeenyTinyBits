@@ -2,5 +2,6 @@
 
 if ./build.sh ; then
   printf "\n"
-  ./build/TeenyTinyBits
+  cd ./build/
+  ./TeenyTinyBits
 fi

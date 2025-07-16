@@ -1,0 +1,7 @@
+{
+    "recommendations": [
+        "editorconfig.editorconfig",
+        "kylinideteam.cmake-intellisence",
+        "vadimcn.vscode-lldb"
+    ]
+}

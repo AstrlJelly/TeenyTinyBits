@@ -1,14 +1,21 @@
 #pragma once
 
+// std library
 #include <iostream>
-#include <stdio.h>
+#include <cstdio>
 
+// include directories
 #include <GLAD/glad.h> 
 #include <GLFW/glfw3.h>
 
-#include "constants.hpp"
+// project headers
+#include <constants.hpp>
 
 int main(void);
 
-void processInput(GLFWwindow *window);
+void render(GLFWwindow* window);
+
+static void windowInit(GLFWwindow* window);
+
+void processInput(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);  
