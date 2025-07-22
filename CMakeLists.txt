@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.31)
 
 project(TeenyTinyBits VERSION 0.0.1)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(PROJECT_SCRIPTS_DIR ${PROJECT_SOURCE_DIR}/scripts)
 
@@ -10,7 +10,10 @@ configure_file(${PROJECT_SCRIPTS_DIR}/constants.hpp.in ${PROJECT_BINARY_DIR}/con
 
 add_executable(${PROJECT_NAME} 
     include/glad/glad.c
-    ${PROJECT_SCRIPTS_DIR}/main.cpp)
+    ${PROJECT_SCRIPTS_DIR}/main.cpp
+    ${PROJECT_SCRIPTS_DIR}/shader.cpp
+    ${PROJECT_SCRIPTS_DIR}/game_window.cpp
+    ${PROJECT_SCRIPTS_DIR}/input_manager.cpp)
 
 add_subdirectory(include/glm)
 add_subdirectory(include/GLFW)

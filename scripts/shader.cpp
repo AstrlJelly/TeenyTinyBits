@@ -26,7 +26,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     }
     catch (std::ifstream::failure e)
     {
-        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
     }
     const char* vShaderCode = vertexCode.c_str();
     const char* fShaderCode = fragmentCode.c_str();
@@ -58,6 +58,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     {
         glGetShaderInfoLog(fragment, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+        throw;
     }
     
     // shader Program
@@ -71,11 +72,37 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     {
         glGetProgramInfoLog(ID, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+        throw;
     }
     
     // delete the shaders as they're linked into our program now and no longer necessary
     glDeleteShader(vertex);
     glDeleteShader(fragment);
+
+    this->update_uniforms();
+}
+
+void Shader::update_uniforms()
+{
+    // variables of uniforms
+    GLint count;
+
+    GLint size; // size of the variable
+    GLenum type; // type of the variable (float, vec3 or mat4, etc)
+
+    const GLsizei bufSize = 16; // maximum name length
+    GLchar name[bufSize]; // variable name in GLSL
+    GLsizei length; // name length
+
+    glGetProgramiv(ID, GL_ACTIVE_UNIFORMS, &count);
+
+    uniformLocations = {};
+    for (GLuint i = 0; i < count; i++)
+    {
+        glGetActiveUniform(ID, i, bufSize, &length, &size, &type, name);
+
+        uniformLocations.insert({name, i});
+    }
 }
 
 void Shader::use() 
@@ -85,13 +112,21 @@ void Shader::use()
 
 void Shader::setBool(const std::string &name, bool value) const
 {
-    glUniform1i(glGetUniformLocation(ID, name.c_str()), static_cast<int>(value));
+    GLint location = uniformLocations.at(name);
+    glUniform1i(location, static_cast<int>(value));
 }
 void Shader::setInt(const std::string &name, int value) const
 {
-    glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
+    GLint location = uniformLocations.at(name);
+    glUniform1i(location, value);
 }
 void Shader::setFloat(const std::string &name, float value) const
 {
-    glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
+    GLint location = uniformLocations.at(name);
+    glUniform1f(location, value);
+}
+void Shader::setMat4(const std::string &name, glm::mat4 value) const
+{
+    GLint location = uniformLocations.at(name);
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }

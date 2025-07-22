@@ -10,7 +10,7 @@
             "name": "Launch",
             "preLaunchTask": "CMake: build",
             "program": "${workspaceFolder}/build/${workspaceFolderBasename}",
-            "args": [],
+            "args": [ "-DCMAKE_BUILD_TYPE=Debug", "-DLLDB_EXPORT_ALL_SYMBOLS=ON" ],
             "cwd": "${workspaceFolder}/"
         }
     ]
