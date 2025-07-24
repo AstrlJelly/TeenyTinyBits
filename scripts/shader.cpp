@@ -110,22 +110,22 @@ void Shader::use()
     glUseProgram(ID);
 }
 
-void Shader::setBool(const std::string &name, bool value) const
+void Shader::set_bool(const std::string &name, bool value) const
 {
     GLint location = uniformLocations.at(name);
     glUniform1i(location, static_cast<int>(value));
 }
-void Shader::setInt(const std::string &name, int value) const
+void Shader::set_int(const std::string &name, int value) const
 {
     GLint location = uniformLocations.at(name);
     glUniform1i(location, value);
 }
-void Shader::setFloat(const std::string &name, float value) const
+void Shader::set_float(const std::string &name, float value) const
 {
     GLint location = uniformLocations.at(name);
     glUniform1f(location, value);
 }
-void Shader::setMat4(const std::string &name, glm::mat4 value) const
+void Shader::set_mat4(const std::string &name, glm::mat4 value) const
 {
     GLint location = uniformLocations.at(name);
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
