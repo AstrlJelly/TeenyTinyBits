@@ -51,44 +51,7 @@ static void scroll_glfw_callback(GLFWwindow *window, double xoffset, double yoff
 	inputManager->on_scroll_glfw(window, xoffset, yoffset);
 }
 
-void process_input(GameWindow* gw)
-{
-	// switch (action)
-	// {
-	// 	case GLFW_PRESS: {
-	// 		switch (key) {
-	// 			case GLFW_KEY_ESCAPE: {
-	// 				glfwSetWindowShouldClose(window, true);
-	// 			} break;
-	// 			case -1: {
-	// 			} break;
-	// 			case GLFW_KEY_W: {
-	// 				cameraPos += cameraSpeed * cameraFront;
-	// 			} break;
-	// 			case GLFW_KEY_S: {
-	// 				cameraPos -= cameraSpeed * cameraFront;
-	// 			} break;
-	// 			case GLFW_KEY_A: {
-	// 				cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-	// 			} break;
-	// 			case GLFW_KEY_D: {
-	// 				cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-	// 			} break;
-	// 			default: break;
-	// 		}
-	// 	} break;
-	// 	case GLFW_REPEAT: {
-
-	// 	} break;
-	// 	case GLFW_RELEASE: {
-
-	// 	} break;
-	// 	default: break;
-	// }
-}
-
-
-void framebuffer_size_glfw_callback(GLFWwindow* window, int width, int height)
+static void framebuffer_size_glfw_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
@@ -102,81 +65,88 @@ void GameWindow::start_game_loop()
 {
     // cube :]
 	float vertices[] = {
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,
+		0.5f, -0.5f, -0.5f,  
+		0.5f,  0.5f, -0.5f,  
+		0.5f,  0.5f, -0.5f,  
+		-0.5f,  0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,
 
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,
+		0.5f, -0.5f,  0.5f,  
+		0.5f,  0.5f,  0.5f,  
+		0.5f,  0.5f,  0.5f,  
+		-0.5f,  0.5f,  0.5f,
+		-0.5f, -0.5f,  0.5f,
 
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,
+		-0.5f, -0.5f,  0.5f,
+		-0.5f,  0.5f,  0.5f,
 
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,  
+		0.5f,  0.5f, -0.5f,  
+		0.5f, -0.5f, -0.5f,  
+		0.5f, -0.5f, -0.5f,  
+		0.5f, -0.5f,  0.5f,  
+		0.5f,  0.5f,  0.5f,  
 
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,
+		0.5f, -0.5f, -0.5f,  
+		0.5f, -0.5f,  0.5f,  
+		0.5f, -0.5f,  0.5f,  
+		-0.5f, -0.5f,  0.5f,
+		-0.5f, -0.5f, -0.5f,
 
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+		-0.5f,  0.5f, -0.5f,
+		0.5f,  0.5f, -0.5f,  
+		0.5f,  0.5f,  0.5f,  
+		0.5f,  0.5f,  0.5f,  
+		-0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f, -0.5f, 
 	};
 	unsigned int indices[] = {  // note that we start from 0!
 		0, 1, 3,   // first triangle
 		1, 2, 3    // second triangle
-	}; 
+	};
 
-	GLuint VBO;
-	glGenBuffers(1, &VBO);
+    // first, configure the cube's VAO (and VBO)
+    unsigned int VBO, cubeVAO;
+    glGenVertexArrays(1, &cubeVAO);
+    glGenBuffers(1, &VBO);
 
-	GLuint VAO;
-	glGenVertexArrays(1, &VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	GLuint EBO;
-	glGenBuffers(1, &EBO);
+    glBindVertexArray(cubeVAO);
 
-	// ..:: Initialization code :: ..
-	// 1. bind Vertex Array Object
-	glBindVertexArray(VAO);
-	// 2. copy our vertices array in a vertex buffer for OpenGL to use
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	// 3. copy our index array in a element buffer for OpenGL to use
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-	// 4. then set the vertex attributes pointers
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
+    // second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
+    unsigned int lightCubeVAO;
+    glGenVertexArrays(1, &lightCubeVAO);
+    glBindVertexArray(lightCubeVAO);
 
-	Shader shader = Shader("./shaders/shader.vert", "./shaders/shader.frag");
+    // we only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need (it's already bound, but we do it again for educational purposes)
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	stbi_set_flip_vertically_on_load(true); 
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+	
+	Shader lightingShader = Shader("./shaders/shader.vert", "./shaders/shader.frag");
+	Shader lightCubeShader = Shader("./shaders/shader.vert", "./shaders/lighting.frag");
+
+	// don't forget to use the corresponding shader program first (to set the uniform)
+	lightingShader.use();
+	lightingShader.set_vec3("objectColor", 1.0f, 0.5f, 0.31f);
+	lightingShader.set_vec3("lightColor",  1.0f, 1.0f, 1.0f);
+
+	stbi_set_flip_vertically_on_load(true);
 
 	/// texture stuff
 	unsigned int texture1;
@@ -223,25 +193,28 @@ void GameWindow::start_game_loop()
 	stbi_image_free(data2);
 
 	std::vector<glm::vec3> cubePositions = {
-		glm::vec3( 0.0f,  0.0f,  0.0f),
-		glm::vec3( 2.0f,  5.0f, -15.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),  
-		glm::vec3(-3.8f, -2.0f, -12.3f),  
-		glm::vec3( 2.4f, -0.4f, -3.5f),  
-		glm::vec3(-1.7f,  3.0f, -7.5f),  
-		glm::vec3( 1.3f, -2.0f, -2.5f),  
-		glm::vec3( 1.5f,  2.0f, -2.5f), 
-		glm::vec3( 1.5f,  0.2f, -1.5f), 
-		glm::vec3(-1.3f,  1.0f, -1.5f)  
+		glm::vec3( 0.0,  0.0,  0.0),
+		glm::vec3( 2.0,  5.0, -15.0),
+		glm::vec3(-1.5, -2.2, -2.5),
+		glm::vec3(-3.8, -2.0, -12.3),
+		glm::vec3( 2.4, -0.4, -3.5),
+		glm::vec3(-1.7,  3.0, -7.5),
+		glm::vec3( 1.3, -2.0, -2.5),
+		glm::vec3( 1.5,  2.0, -2.5),
+		glm::vec3( 1.5,  0.2, -1.5),
+		glm::vec3(-1.3,  1.0, -1.5)
 	};
 
-	glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);
-	glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-	glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
+	glm::vec3 lightPos   (1.2, 1.0,  2.0);
+
+	glm::vec3 cameraPos   (0.0, 0.0,  3.0);
+	glm::vec3 cameraFront (0.0, 0.0, -1.0);
+	glm::vec3 cameraUp    (0.0, 1.0,  0.0);
 
 	double yaw   = -90.0;
-	double pitch = 0.0;
-	double fov   = 45.0;
+	double pitch =   0.0;
+	double fov   =  45.0;
+
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -264,8 +237,6 @@ void GameWindow::start_game_loop()
         }
         if (inputManager->is_key_pressed_this_frame(GLFW_KEY_T))
         {
-            std::cout << "This should happen ONCE!!!!!\n";
-
 			GLint polygonMode;
 			glGetIntegerv(GL_POLYGON_MODE, &polygonMode);
 
@@ -277,10 +248,6 @@ void GameWindow::start_game_loop()
 			{
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			}
-        }
-        if (inputManager->is_key_pressed(GLFW_KEY_Y))
-        {
-            std::cout << "This should happen multiple times.\n";
         }
 		if (false && inputManager->is_key_pressed(GLFW_KEY_B))
 		{
@@ -322,25 +289,15 @@ void GameWindow::start_game_loop()
 		fov += scrollDelta.y;
 		fov = std::clamp(fov, 1.0, 90.0);
 
-		/// end input
-
-		/// rendering
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture1);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texture2);
-
-		shader.use();
-
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-
 		glm::vec3 direction;
 		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
 		direction.y = sin(glm::radians(pitch));
 		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 		cameraFront = glm::normalize(direction);
+
+		/// end input
+
+		/// rendering
 
 		glm::mat4 view = glm::mat4(1.0f);
 		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
@@ -350,25 +307,52 @@ void GameWindow::start_game_loop()
 		glm::mat4 projection;
 		projection = glm::perspective(glm::radians((float)fov), (float)windowWidth / (float)windowHeight, 0.1f, 100.0f);
 
-		shader.set_mat4("transform", projection * view * model);
-		
-		shader.set_float("time", glfwGetTime());
-		shader.set_int("texture1", 0);
-		shader.set_int("texture2", 1);
-		
-		glBindVertexArray(VAO);
-		for (unsigned int j = 0; j < cubePositions.size(); j++)
-		{
-			int i = j % cubePositions.size();
-			
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, cubePositions[i]);
-			float angle = 20.0f * i;
-			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			shader.set_mat4("transform", projection * view * model);
+		glm::mat4 model = glm::mat4(1.0f);
 
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
+		lightingShader.use();
+
+		// lightingShader.set_mat4("projection", projection);
+		// lightingShader.set_mat4("view", view);
+		// lightingShader.set_mat4("model", model);
+		lightingShader.set_mat4("relativeModel", projection * view * model);
+
+		// draw the cube object
+		glBindVertexArray(cubeVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		lightCubeShader.use();
+		// draw the light cube object
+		glBindVertexArray(lightCubeVAO);
+		
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, lightPos);
+		model = glm::scale(model, glm::vec3(0.2f)); 
+
+		// lightCubeShader.set_mat4("projection", projection);
+		// lightCubeShader.set_mat4("view", view);
+		// lightCubeShader.set_mat4("model", model);
+		lightCubeShader.set_mat4("relativeModel", projection * view * model);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		// glActiveTexture(GL_TEXTURE0);
+		// glBindTexture(GL_TEXTURE_2D, texture1);
+		// glActiveTexture(GL_TEXTURE1);
+		// glBindTexture(GL_TEXTURE_2D, texture2);
+		
+		// glBindVertexArray(VAO);
+		// for (unsigned int j = 0; j < cubePositions.size(); j++)
+		// {
+		// 	int i = j % cubePositions.size();
+			
+		// 	glm::mat4 model = glm::mat4(1.0f);
+		// 	model = glm::translate(model, cubePositions[i]);
+		// 	float angle = 20.0f * i;
+		// 	model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+		// 	lightingShader.set_mat4("relativeModel", projection * view * model);
+
+		// 	glDrawArrays(GL_TRIANGLES, 0, 36);
+		// }
 
 		// not technically necessary but it can make things more consistent
 		glBindVertexArray(0);
@@ -393,6 +377,9 @@ void GameWindow::initialize_frame()
 GameWindow* GameWindow::get_game_window(GLFWwindow* window)
 {
     void* possibleGameWindow = glfwGetWindowUserPointer(window);
+	// scary!!
+	// shouldn't ever be called without it being valid, though.
+	// i'll only use GLFWwindow in the context of GameWindow
     GameWindow* gameWindow = static_cast<GameWindow*>(possibleGameWindow);
 	return gameWindow;
 }

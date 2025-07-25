@@ -97,7 +97,7 @@ void Shader::update_uniforms()
     glGetProgramiv(ID, GL_ACTIVE_UNIFORMS, &count);
 
     uniformLocations = {};
-    for (GLuint i = 0; i < count; i++)
+    for (GLint i = 0; i < count; i++)
     {
         glGetActiveUniform(ID, i, bufSize, &length, &size, &type, name);
 
@@ -110,23 +110,54 @@ void Shader::use()
     glUseProgram(ID);
 }
 
+GLint Shader::get_uniform_location(const std::string &name) const
+{
+    auto possibleLocation = uniformLocations.find(name);
+    if (possibleLocation != uniformLocations.end())
+    {
+        return possibleLocation->second;
+    }
+    else
+    {
+        GLint location = glGetUniformLocation(ID, name.c_str());
+        if (location < 0)
+        {
+            std::cerr << "Uniform with name \"" << name << "\" was not found in cache. Did you spell it wrong, or are you not using this uniform in your glsl code?\n";
+        }
+        else
+        {
+            std::cout << "Uniform with name \"" << name << "\" was not found in cache. Fallback provided.\n";
+        }
+        return location;
+    }
+}
+
 void Shader::set_bool(const std::string &name, bool value) const
 {
-    GLint location = uniformLocations.at(name);
+    GLint location = this->get_uniform_location(name);
     glUniform1i(location, static_cast<int>(value));
 }
 void Shader::set_int(const std::string &name, int value) const
 {
-    GLint location = uniformLocations.at(name);
+    GLint location = this->get_uniform_location(name);
     glUniform1i(location, value);
 }
 void Shader::set_float(const std::string &name, float value) const
 {
-    GLint location = uniformLocations.at(name);
+    GLint location = this->get_uniform_location(name);
     glUniform1f(location, value);
+}
+void Shader::set_vec3(const std::string &name, double x, double y, double z) const
+{
+    this->set_vec3(name, glm::vec3(x, y, z));
+}
+void Shader::set_vec3(const std::string &name, glm::vec3 value) const
+{
+    GLint location = this->get_uniform_location(name);
+    glUniform3fv(location, 1, glm::value_ptr(value));
 }
 void Shader::set_mat4(const std::string &name, glm::mat4 value) const
 {
-    GLint location = uniformLocations.at(name);
+    GLint location = this->get_uniform_location(name);
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
