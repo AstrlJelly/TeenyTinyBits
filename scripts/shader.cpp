@@ -90,7 +90,7 @@ void Shader::update_uniforms()
     GLint size; // size of the variable
     GLenum type; // type of the variable (float, vec3 or mat4, etc)
 
-    const GLsizei bufSize = 16; // maximum name length
+    const GLsizei bufSize = 255;
     GLchar name[bufSize]; // variable name in GLSL
     GLsizei length; // name length
 
@@ -100,7 +100,6 @@ void Shader::update_uniforms()
     for (GLint i = 0; i < count; i++)
     {
         glGetActiveUniform(ID, i, bufSize, &length, &size, &type, name);
-        std::cout << i << ": " << name << "\n";
 
         uniformLocations.insert({name, i});
     }

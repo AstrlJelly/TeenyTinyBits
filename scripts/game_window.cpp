@@ -1,5 +1,6 @@
 #include "game_window.hpp"
 #include "GLFW/glfw3.h"
+#include "glm/glm/geometric.hpp"
 #include "input_manager.hpp"
 #include <algorithm>
 #include <cmath>
@@ -115,10 +116,10 @@ void GameWindow::start_game_loop()
 	Shader lightingShader = Shader("./shaders/shader.vert", "./shaders/shader.frag");
 	Shader lightCubeShader = Shader("./shaders/shader.vert", "./shaders/lighting.frag");
 
-	// don't forget to use the corresponding shader program first (to set the uniform)
-	lightingShader.use();
-	lightingShader.set_vec3("objectColor", 1.0f, 0.5f, 0.31f);
-	lightingShader.set_vec3("lightColor",  1.0f, 1.0f, 1.0f);
+	// // don't forget to use the corresponding shader program first (to set the uniform)
+	// lightingShader.use();
+	// lightingShader.set_vec3("objectColor", 1.0f, 0.5f, 0.31f);
+	// lightingShader.set_vec3("lightColor",  1.0f, 1.0f, 1.0f);
 
 	stbi_set_flip_vertically_on_load(true);
 
@@ -179,17 +180,18 @@ void GameWindow::start_game_loop()
 	// 	glm::vec3(-1.3,  1.0, -1.5)
 	// };
 
-	double lightMoveTimer = 0;
+	double lightMoveTimer = 1.35;
+	double lightColorTimer = 0.0;
 	glm::vec3 lightPos (1.2, 1.0,  2.0);
 
-	glm::vec3 cameraPos   (1.15, 1.65, 3.63);
+	glm::vec3 cameraPos   (1.41, 3.38, 2.20);
 	glm::vec3 cameraFront (0.0,   0.0, -1.0);
 	glm::vec3 cameraUp    (0.0,   1.0,  0.0);
 
-	double yaw   = -100.0;
-	double pitch =  -23.0;
-	double fov   =   45.0;
-
+	double yaw   = -121.5;
+	double pitch =  -52.8;
+	double fov   =   60.0;
+	const double minFov = 10.0, maxFov = 90.0;
 
 	this->set_cursor_mode(GLFW_CURSOR_DISABLED);
 
@@ -234,17 +236,21 @@ void GameWindow::start_game_loop()
         if (inputManager->is_key_pressed_this_frame(GLFW_KEY_ESCAPE)) {
             glfwSetWindowShouldClose(window, true);
         }
-        if (inputManager->is_key_pressed_this_frame(GLFW_KEY_L)) {
+        if (inputManager->is_key_pressed_this_frame(GLFW_KEY_TAB)) {
 			std::cout << "cameraPos = " << glm::to_string(cameraPos) << "\n";
 			std::cout << "yaw = " << yaw << "\n";
 			std::cout << "pitch = " << pitch << "\n";
 			std::cout << "fov = " << fov << "\n";
+			std::cout << "lightMoveTimer = " << lightMoveTimer << "\n";
         }
         if (inputManager->is_key_pressed_this_frame(GLFW_KEY_F)) {
 			this->set_cursor_mode(get_cursor_mode() == GLFW_CURSOR_DISABLED ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
         }
 		if (inputManager->is_key_pressed(GLFW_KEY_E)) {
-			lightMoveTimer += deltaTime * 1.5;
+			lightMoveTimer += deltaTime * 3;
+		}
+		if (inputManager->is_key_pressed(GLFW_KEY_Q)){
+			lightColorTimer += deltaTime * 4;
 		}
 		lightPos = glm::vec3(sin(lightMoveTimer) * 1.5, lightPos.y, cos(lightMoveTimer) * 1.5);
 
@@ -278,7 +284,7 @@ void GameWindow::start_game_loop()
 		pitch = std::clamp(pitch, -89.999, 89.999);
 
 		fov += scrollDelta.y;
-		fov = std::clamp(fov, 1.0, 90.0);
+		fov = std::clamp(fov, minFov, maxFov);
 
 		glm::vec3 direction;
 		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
@@ -305,9 +311,29 @@ void GameWindow::start_game_loop()
 		lightingShader.set_mat4("projection", projection);
 		lightingShader.set_mat4("view", view);
 		lightingShader.set_mat4("model", model);
-		lightingShader.set_vec3("lightPos", lightPos);
-		lightingShader.set_vec3("cameraPos", cameraPos); 
+		lightingShader.set_vec3("viewPos", cameraPos); 
 
+		lightingShader.set_vec3("material.ambient", 1.0f, 0.5f, 0.31f);
+		lightingShader.set_vec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+		lightingShader.set_vec3("material.specular", 0.5f, 0.5f, 0.5f);
+		lightingShader.set_float("material.shininess", 32.0f);
+
+
+		glm::vec3 lightColor;
+		lightColor.r = sin(lightColorTimer * 2.0f);
+		lightColor.g = sin(lightColorTimer * 0.7f);
+		lightColor.b = sin(lightColorTimer * 1.3f);
+		lightColor += 2;
+		float magnitude = glm::length(lightColor);
+		lightColor /= 1.5;
+
+		glm::vec3 diffuseColor = lightColor   * glm::vec3(0.7f); 
+		glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); 
+		
+		lightingShader.set_vec3("light.position", lightPos);
+		lightingShader.set_vec3("light.ambient", ambientColor);
+		lightingShader.set_vec3("light.diffuse", diffuseColor);
+		lightingShader.set_vec3("light.specular", 1.0f, 1.0f, 1.0f); 
 
 		// draw the cube object
 		glBindVertexArray(cubeVAO);
@@ -324,6 +350,8 @@ void GameWindow::start_game_loop()
 		lightCubeShader.set_mat4("projection", projection);
 		lightCubeShader.set_mat4("view", view);
 		lightCubeShader.set_mat4("model", model);
+
+		lightCubeShader.set_vec3("lightColor", lightColor);
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
