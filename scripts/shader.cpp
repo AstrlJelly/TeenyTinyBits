@@ -1,71 +1,76 @@
 #include "shader.hpp"
+#include <GL/glext.h>
+#include <cstdarg>
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
-    // 1. retrieve the vertex/fragment source code from filePath
-    std::string vertexCode, fragmentCode;
-    std::ifstream vShaderFile, fShaderFile;
+    unsigned int vertex = compile_shader(vertexPath, GL_VERTEX_SHADER);
+    unsigned int fragment = compile_shader(fragmentPath, GL_FRAGMENT_SHADER);
+
+    // shader Program
+    ID = create_program(2, vertex, fragment);
+
+    this->update_uniforms();
+}
+
+unsigned int compile_shader(const char* path, int shaderType)
+{
+    std::string code;
+    std::ifstream shaderFile;
     // ensure ifstream objects can throw exceptions:
-    vShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
-    fShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
+    shaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
     try 
     {
         // open files
-        vShaderFile.open(vertexPath);
-        fShaderFile.open(fragmentPath);
-        std::stringstream vShaderStream, fShaderStream;
+        shaderFile.open(path);
+        std::stringstream shaderStream;
         // read file's buffer contents into streams
-        vShaderStream << vShaderFile.rdbuf();
-        fShaderStream << fShaderFile.rdbuf();		
+        shaderStream << shaderFile.rdbuf();
         // close file handlers
-        vShaderFile.close();
-        fShaderFile.close();
+        shaderFile.close();
         // convert stream into string
-        vertexCode   = vShaderStream.str();
-        fragmentCode = fShaderStream.str();		
+        code   = shaderStream.str();
     }
     catch (std::ifstream::failure e)
     {
         std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
     }
-    const char* vShaderCode = vertexCode.c_str();
-    const char* fShaderCode = fragmentCode.c_str();
+    const char* shaderCode = code.c_str();
 
     // 2. compile shaders
-    unsigned int vertex, fragment;
+    unsigned int shaderID;
     int success;
     char infoLog[512];
     
     // vertex Shader
-    vertex = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex, 1, &vShaderCode, NULL);
-    glCompileShader(vertex);
+    shaderID = glCreateShader(shaderType);
+    glShaderSource(shaderID, 1, &shaderCode, NULL);
+    glCompileShader(shaderID);
     // print compile errors if any
-    glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
+    glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
     if (!success)
     {
-        glGetShaderInfoLog(vertex, 512, NULL, infoLog);
+        glGetShaderInfoLog(shaderID, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+        exit(1);
     }
+
+    return shaderID;
+}
+
+unsigned int create_program(int count, ...)
+{
+    std::va_list args;
+    va_start(args, count);
     
-    // fragment Shader
-    fragment = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment, 1, &fShaderCode, NULL);
-    glCompileShader(fragment);
-    // print compile errors if any
-    glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(fragment, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-        throw;
+    unsigned int ID = glCreateProgram();
+    for (int i = 0; i < count; i++) {
+        glAttachShader(ID, va_arg(args, GLuint));
     }
-    
-    // shader Program
-    ID = glCreateProgram();
-    glAttachShader(ID, vertex);
-    glAttachShader(ID, fragment);
     glLinkProgram(ID);
+    
+    int success;
+    char infoLog[512];
     // print linking errors if any
     glGetProgramiv(ID, GL_LINK_STATUS, &success);
     if (!success)
@@ -76,10 +81,11 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     }
     
     // delete the shaders as they're linked into our program now and no longer necessary
-    glDeleteShader(vertex);
-    glDeleteShader(fragment);
+    for (int i = 0; i < count; i++) {
+        glDeleteShader(va_arg(args, GLuint));
+    }
 
-    this->update_uniforms();
+    return ID;
 }
 
 void Shader::update_uniforms()

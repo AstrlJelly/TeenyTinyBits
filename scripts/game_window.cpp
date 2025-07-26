@@ -1,7 +1,13 @@
 #include "game_window.hpp"
 #include "GLFW/glfw3.h"
+#include "glm/glm/ext/matrix_clip_space.hpp"
+#include "glm/glm/ext/matrix_transform.hpp"
+#include "glm/glm/fwd.hpp"
 #include "glm/glm/geometric.hpp"
+#include "glm/glm/matrix.hpp"
 #include "input_manager.hpp"
+#include "main.hpp"
+#include "shader.hpp"
 #include <algorithm>
 #include <cmath>
 #include <ostream>
@@ -9,7 +15,7 @@
 GameWindow::GameWindow(glm::vec2 size, const char* title)
 {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	this->window = glfwCreateWindow(size.x, size.y, title, NULL, NULL);
@@ -42,87 +48,34 @@ void GameWindow::start_game_loop()
 {
     // cube :]
 	float vertices[] = {
-		// positions          // normals           // texture coords
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-		0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-		0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-		0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-		0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+		 // positions         // texture coords
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 	};
 
     // first, configure the cube's VAO (and VBO)
-    unsigned int VBO, cubeVAO;
-    glGenVertexArrays(1, &cubeVAO);
+    unsigned int VBO, VAO;
+    glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glBindVertexArray(cubeVAO);
+    glBindVertexArray(VAO);
 
     // position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-
-    // second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
-    unsigned int lightCubeVAO;
-    glGenVertexArrays(1, &lightCubeVAO);
-    glBindVertexArray(lightCubeVAO);
-
-    // we only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need (it's already bound, but we do it again for educational purposes)
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
 
 	
 	Shader lightingShader = Shader("./shaders/shader.vert", "./shaders/shader.frag");
-	Shader lightCubeShader = Shader("./shaders/shader.vert", "./shaders/lighting.frag");
-
-	// // don't forget to use the corresponding shader program first (to set the uniform)
-	// lightingShader.use();
-	// lightingShader.set_vec3("objectColor", 1.0f, 0.5f, 0.31f);
-	// lightingShader.set_vec3("lightColor",  1.0f, 1.0f, 1.0f);
+	// ComputeShader computeShader = ComputeShader("./shaders/bits.comp");
 
 	stbi_set_flip_vertically_on_load(true);
 
@@ -149,67 +102,37 @@ void GameWindow::start_game_loop()
 	}
 	stbi_image_free(diffuseMapData);
 
-	unsigned int specularMap;
-	glGenTextures(1, &specularMap);
-	glBindTexture(GL_TEXTURE_2D, specularMap);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	unsigned char *specularMapData = stbi_load("./assets/container2_specular.png", &width, &height, &nrChannels, 0);
-	if (specularMapData)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, specularMapData);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load EPIC texture" << std::endl;
-	}
-	stbi_image_free(specularMapData);
-
-	// std::vector<glm::vec3> cubePositions = {
-	// 	glm::vec3( 0.0,  0.0,  0.0),
-	// 	glm::vec3( 2.0,  5.0, -15.0),
-	// 	glm::vec3(-1.5, -2.2, -2.5),
-	// 	glm::vec3(-3.8, -2.0, -12.3),
-	// 	glm::vec3( 2.4, -0.4, -3.5),
-	// 	glm::vec3(-1.7,  3.0, -7.5),
-	// 	glm::vec3( 1.3, -2.0, -2.5),
-	// 	glm::vec3( 1.5,  2.0, -2.5),
-	// 	glm::vec3( 1.5,  0.2, -1.5),
-	// 	glm::vec3(-1.3,  1.0, -1.5)
-	// };
-
-	double lightMoveTimer = 1.35;
-	double lightColorTimer = 0.0;
-	glm::vec3 lightPos (1.2, 1.0,  2.0);
-
-	glm::vec3 cameraPos   (1.41, 3.38, 2.20);
-	glm::vec3 cameraFront (0.0,   0.0, -1.0);
-	glm::vec3 cameraUp    (0.0,   1.0,  0.0);
-
-	double yaw   = -121.5;
-	double pitch =  -52.8;
-	double fov   =   60.0;
-	const double minFov = 10.0, maxFov = 90.0;
-
-	this->set_cursor_mode(GLFW_CURSOR_DISABLED);
+	glm::vec3 cameraPos(0.0, 0.0, 0.0);
+	float zoomLevel = 1;
+	const float minZoomLevel = 0.001, maxZoomLevel = 100;
 
 	while (!glfwWindowShouldClose(window))
 	{
+		/// initialization stuff
 		this->initialize_frame();
 		inputManager->initialize_frame(window, deltaTime);
 		float deltaTimeF = deltaTime;
 		glm::vec2 cursorDelta = inputManager->get_cursor_delta();
 		glm::vec2 focusedCursorDelta = this->get_focused_cursor_delta();
+		glm::vec2 relativeCursorDelta = this->get_relative_cursor_delta();
 		glm::vec2 scrollDelta = inputManager->get_scroll_delta();
+
+		glm::mat4 view = glm::mat4(1.0f);
+		view = glm::translate(view, cameraPos);
+		view = glm::scale(view, glm::vec3(zoomLevel, zoomLevel, 1));
+
+		glm::mat4 model = glm::mat4(1.0f);
+
+		/// end init stuff
 
 		/// input stuff
 
         const float cameraSpeed = 0.05f; // adjust accordingly
+
+        if (inputManager->is_mouse_button_pressed(GLFW_MOUSE_BUTTON_1)) {
+			glm::vec3 moveCam = glm::vec3(relativeCursorDelta.x, -relativeCursorDelta.y, 0.0);
+			cameraPos += moveCam;
+        }
 
         if (inputManager->is_key_pressed_this_frame(GLFW_KEY_T))
         {
@@ -225,144 +148,32 @@ void GameWindow::start_game_loop()
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			}
         }
-		// if (inputManager->is_key_pressed(GLFW_KEY_B))
-		// {
-		// 	double time = glfwGetTime();
-		// 	int width, height;
-		// 	glfwGetWindowSize(window, &width, &height);
-		// 	double x = std::fmod(time * 0.2, 1.0);
-		// 	double y = (sin(time * 2) + 1) / 2;
-		// 	// glfwSetCursorPos(window, width * x, height * y);
-		// 	cubePositions.push_back(glm::vec3(x * 10, y, -10));
-		// }
 
         if (inputManager->is_key_pressed_this_frame(GLFW_KEY_ESCAPE)) {
             glfwSetWindowShouldClose(window, true);
         }
         if (inputManager->is_key_pressed_this_frame(GLFW_KEY_TAB)) {
 			std::cout << "cameraPos = " << glm::to_string(cameraPos) << "\n";
-			std::cout << "yaw = " << yaw << "\n";
-			std::cout << "pitch = " << pitch << "\n";
-			std::cout << "fov = " << fov << "\n";
-			std::cout << "lightMoveTimer = " << lightMoveTimer << "\n";
         }
         if (inputManager->is_key_pressed_this_frame(GLFW_KEY_F)) {
 			this->set_cursor_mode(get_cursor_mode() == GLFW_CURSOR_DISABLED ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
         }
-		if (inputManager->is_key_pressed(GLFW_KEY_E)) {
-			lightMoveTimer += deltaTime * 3;
-		}
-		if (inputManager->is_key_pressed(GLFW_KEY_Q)){
-			lightColorTimer += deltaTime * 4;
-		}
-		lightPos = glm::vec3(sin(lightMoveTimer) * 1.5, lightPos.y, cos(lightMoveTimer) * 1.5);
 
-		const float moveSpeed = 5;
-		float moveAmount = deltaTimeF * moveSpeed;
-
-		if (inputManager->is_key_pressed(GLFW_KEY_W)) {
-			cameraPos += moveAmount * cameraFront;
-		}
-		if (inputManager->is_key_pressed(GLFW_KEY_S)) {
-			cameraPos -= moveAmount * cameraFront;
-		}
-		if (inputManager->is_key_pressed(GLFW_KEY_LEFT_SHIFT)) {
-			// is this how you do this..? oh well. it works <3
-			cameraPos += moveAmount * glm::normalize(glm::cross(glm::cross(cameraFront, cameraUp), cameraFront));
-		}
-		if (inputManager->is_key_pressed(GLFW_KEY_LEFT_CONTROL)) {
-			cameraPos -= moveAmount * glm::normalize(glm::cross(glm::cross(cameraFront, cameraUp), cameraFront));
-		}
-		if (inputManager->is_key_pressed(GLFW_KEY_A)) {
-			cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * moveAmount;
-		}
-		if (inputManager->is_key_pressed(GLFW_KEY_D)) {
-			cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * moveAmount;
-		}
-
-		const float sensitivity = 0.1f;
-		yaw   += focusedCursorDelta.x * sensitivity;
-		pitch += -focusedCursorDelta.y * sensitivity;
-
-		pitch = std::clamp(pitch, -89.999, 89.999);
-
-		fov += scrollDelta.y;
-		fov = std::clamp(fov, minFov, maxFov);
-
-		glm::vec3 direction;
-		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-		direction.y = sin(glm::radians(pitch));
-		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-		cameraFront = glm::normalize(direction);
+		zoomLevel += (zoomLevel * (-scrollDelta.y / 10.0));
+		zoomLevel = std::clamp(zoomLevel, minZoomLevel, maxZoomLevel);
 
 		/// end input
 
 		/// rendering
 
-		glm::mat4 view = glm::mat4(1.0f);
-		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-
-		int windowWidth, windowHeight;
-		glfwGetWindowSize(window, &windowWidth, &windowHeight);
-		glm::mat4 projection;
-		projection = glm::perspective(glm::radians((float)fov), (float)windowWidth / (float)windowHeight, 0.1f, 100.0f);
-
-		glm::mat4 model = glm::mat4(1.0f);
-
 		lightingShader.use();
 
-		lightingShader.set_mat4("projection", projection);
+		// lightingShader.set_mat4("ortho", ortho);
 		lightingShader.set_mat4("view", view);
 		lightingShader.set_mat4("model", model);
-		lightingShader.set_vec3("viewPos", cameraPos); 
 
-		lightingShader.set_vec3("material.ambient", 1.0f, 0.5f, 0.31f);
-		lightingShader.set_int("material.diffuse", 0);
-		lightingShader.set_int("material.specular", 1);
-		lightingShader.set_float("material.shininess", 32.0f);
-
-
-		glm::vec3 lightColor;
-		lightColor.r = sin(lightColorTimer * 2.0f);
-		lightColor.g = sin(lightColorTimer * 0.7f);
-		lightColor.b = sin(lightColorTimer * 1.3f);
-		lightColor += 2;
-		float magnitude = glm::length(lightColor);
-		lightColor /= 1.5;
-
-		glm::vec3 diffuseColor = lightColor   * glm::vec3(0.7f); 
-		glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); 
-		
-		lightingShader.set_vec3("light.position", lightPos);
-		lightingShader.set_vec3("light.ambient", ambientColor);
-		lightingShader.set_vec3("light.diffuse", diffuseColor);
-		
-		lightingShader.set_vec3("light.specular", 1.0f, 1.0f, 1.0f); 
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, diffuseMap);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, specularMap);  
-
-		// draw the cube object
-		glBindVertexArray(cubeVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		lightCubeShader.use();
-		// draw the light cube object
-		glBindVertexArray(lightCubeVAO);
-		
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, lightPos);
-		model = glm::scale(model, glm::vec3(0.2f)); 
-
-		lightCubeShader.set_mat4("projection", projection);
-		lightCubeShader.set_mat4("view", view);
-		lightCubeShader.set_mat4("model", model);
-
-		lightCubeShader.set_vec3("lightColor", lightColor);
-
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		// not technically necessary but it can make things more consistent
 		glBindVertexArray(0);
@@ -419,6 +230,14 @@ glm::vec2 GameWindow::get_focused_cursor_delta()
 	{
 		return glm::vec2(0, 0);
 	}
+}
+
+glm::vec2 GameWindow::get_relative_cursor_delta()
+{
+	glm::vec<2, int> windowSize{};
+	glfwGetWindowSize(window, &windowSize.x, &windowSize.y);
+	glm::vec2 windowSizeF = windowSize;
+	return (inputManager->get_cursor_delta() * glm::vec2(2)) / windowSizeF;
 }
 
 int GameWindow::get_cursor_mode()

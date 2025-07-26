@@ -38,6 +38,7 @@ public:
     
     // implies that raw cursor data will be retrieved if supported
     glm::vec2 get_focused_cursor_delta();
+    glm::vec2 get_relative_cursor_delta();
 
     int get_cursor_mode();
     void set_cursor_mode(int mode);

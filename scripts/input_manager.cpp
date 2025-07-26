@@ -50,8 +50,9 @@ InputManager::InputManager()
 void InputManager::initialize_callbacks(GLFWwindow *window)
 {
 	glfwSetKeyCallback(window, on_key_glfw_callback);
-	glfwSetScrollCallback(window, on_scroll_glfw_callback);
+    glfwSetMouseButtonCallback(window, on_mouse_button_glfw_callback);
 	glfwSetCursorPosCallback(window, on_cursor_move_glfw_callback);
+	glfwSetScrollCallback(window, on_scroll_glfw_callback);
 }
 
 bool InputManager::is_key_pressed_this_frame(int key)
@@ -75,6 +76,30 @@ bool InputManager::is_key_released_this_frame(int key)
 bool InputManager::is_key_released(int key)
 {
     KeyStateInfo keyState = allKeyStates[key];
+    return keyState.is_in_state(KEY_RELEASED);
+}
+
+bool InputManager::is_mouse_button_pressed_this_frame(int button)
+{
+    KeyStateInfo keyState = allMouseButtonStates[button];
+    return keyState.is_in_state(KEY_PRESSED) && keyState.get_timestamp() > lastFrameStartTime;
+}
+
+bool InputManager::is_mouse_button_pressed(int button)
+{
+    KeyStateInfo keyState = allMouseButtonStates[button];
+    return keyState.is_in_state(KEY_PRESSED);
+}
+
+bool InputManager::is_mouse_button_released_this_frame(int button)
+{
+    KeyStateInfo keyState = allMouseButtonStates[button];
+    return keyState.is_in_state(KEY_RELEASED) && keyState.get_timestamp() > lastFrameStartTime;
+}
+
+bool InputManager::is_mouse_button_released(int button)
+{
+    KeyStateInfo keyState = allMouseButtonStates[button];
     return keyState.is_in_state(KEY_RELEASED);
 }
 
@@ -119,6 +144,12 @@ void InputManager::on_key_glfw_callback(GLFWwindow *window, int key, int scancod
 	inputManager->on_key_glfw(window, key, scancode, action, mods);
 }
 
+void InputManager::on_mouse_button_glfw_callback(GLFWwindow *window, int button, int action, int mods)
+{
+    InputManager* inputManager = InputManager::get_input_manager(window);
+	inputManager->on_mouse_button_glfw(window, button, action, mods);
+}
+
 void InputManager::on_scroll_glfw_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
     InputManager* inputManager = InputManager::get_input_manager(window);
@@ -139,6 +170,13 @@ void InputManager::on_key_glfw(GLFWwindow* window, int key, int scancode, int ac
     KeyState newState = action == GLFW_PRESS ? KEY_PRESSED : KEY_RELEASED;
     KeyStateInfo keyStateInfo = KeyStateInfo(newState, mods);
     allKeyStates.insert_or_assign(key, keyStateInfo);
+}
+
+void InputManager::on_mouse_button_glfw(GLFWwindow* window, int button, int action, int mods)
+{
+    KeyState newState = action == GLFW_PRESS ? KEY_PRESSED : KEY_RELEASED;
+    KeyStateInfo keyStateInfo = KeyStateInfo(newState, mods);
+    allMouseButtonStates.insert_or_assign(button, keyStateInfo);
 }
 
 void InputManager::on_cursor_move_glfw(GLFWwindow* window, double x, double y)

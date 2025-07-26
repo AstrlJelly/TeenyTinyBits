@@ -17,7 +17,6 @@ class Shader
 {
 private:
     void update_uniforms();
-
     
 public:
     // the program ID
@@ -39,3 +38,13 @@ public:
     void set_vec3(const std::string &name, double x, double y, double z) const;
     void set_mat4(const std::string &name, glm::mat4 value) const;
 };
+
+
+class ComputeShader : Shader
+{
+public:
+    ComputeShader(const char* computePath);
+};
+
+static unsigned int compile_shader(const char* path, int shaderType);
+static unsigned int create_program(int count, ...);

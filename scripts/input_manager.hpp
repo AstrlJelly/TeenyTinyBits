@@ -34,6 +34,7 @@ class InputManager
 {
     // key state (GLFW_KEY_A), keystate (duh)
     std::map<int, KeyStateInfo> allKeyStates;
+    std::map<int, KeyStateInfo> allMouseButtonStates;
 
     double frameStartTime;
     double lastFrameStartTime;
@@ -48,6 +49,7 @@ class InputManager
     glm::vec2 realTimeScrollDelta;
 
     static void on_key_glfw_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+    static void on_mouse_button_glfw_callback(GLFWwindow *window, int button, int action, int mods);
     static void on_cursor_move_glfw_callback(GLFWwindow *window, double x, double y);
     static void on_scroll_glfw_callback(GLFWwindow *window, double xoffset, double yoffset);
 
@@ -64,6 +66,11 @@ public:
     bool is_key_released_this_frame(int key);
     bool is_key_released(int key);
 
+    bool is_mouse_button_pressed_this_frame(int button);
+    bool is_mouse_button_pressed(int button);
+    bool is_mouse_button_released_this_frame(int button);
+    bool is_mouse_button_released(int button);
+
     glm::vec2 get_cursor_delta();
     // implies that raw cursor data will be retrieved if supported
     // glm::vec2 get_focused_cursor_delta();
@@ -73,6 +80,7 @@ public:
 
     static void initialize_callbacks(GLFWwindow* window);
     void on_key_glfw(GLFWwindow *window, int key, int scancode, int action, int mods);
+    void on_mouse_button_glfw(GLFWwindow *window, int button, int action, int mods);
     void on_cursor_move_glfw(GLFWwindow *window, double x, double y);
     void on_scroll_glfw(GLFWwindow *window, double xoffset, double yoffset);
 };
