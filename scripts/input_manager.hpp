@@ -37,7 +37,7 @@ class InputManager
 
     double frameStartTime;
     double lastFrameStartTime;
-    bool cursorFocused;
+    bool   cursorFocused;
 
     // only stored for one purpose, but it's good to have it here
     glm::vec2 cursorPos;
@@ -47,8 +47,16 @@ class InputManager
     // // shouldn't really be used, it's highly likely that this changes throughout the frame
     glm::vec2 realTimeScrollDelta;
 
+    static void on_key_glfw_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+    static void on_cursor_move_glfw_callback(GLFWwindow *window, double x, double y);
+    static void on_scroll_glfw_callback(GLFWwindow *window, double xoffset, double yoffset);
+
 public:
     InputManager();
+    // defined in game_window.cpp, since including
+    // it here would lead to a circular dependency
+    static InputManager* get_input_manager(GLFWwindow* window);
+
     KeyStateInfo operator[](int key);
 
     bool is_key_pressed_this_frame(int key);
@@ -57,10 +65,13 @@ public:
     bool is_key_released(int key);
 
     glm::vec2 get_cursor_delta();
+    // implies that raw cursor data will be retrieved if supported
+    // glm::vec2 get_focused_cursor_delta();
     glm::vec2 get_scroll_delta();
 
     void initialize_frame(GLFWwindow* window, double deltaTime);
 
+    static void initialize_callbacks(GLFWwindow* window);
     void on_key_glfw(GLFWwindow *window, int key, int scancode, int action, int mods);
     void on_cursor_move_glfw(GLFWwindow *window, double x, double y);
     void on_scroll_glfw(GLFWwindow *window, double xoffset, double yoffset);

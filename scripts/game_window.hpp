@@ -35,4 +35,10 @@ public:
     InputManager* get_input_manager();
 
     double get_delta_time();
+    
+    // implies that raw cursor data will be retrieved if supported
+    glm::vec2 get_focused_cursor_delta();
+
+    int get_cursor_mode();
+    void set_cursor_mode(int mode);
 };

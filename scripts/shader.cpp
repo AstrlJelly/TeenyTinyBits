@@ -100,6 +100,7 @@ void Shader::update_uniforms()
     for (GLint i = 0; i < count; i++)
     {
         glGetActiveUniform(ID, i, bufSize, &length, &size, &type, name);
+        std::cout << i << ": " << name << "\n";
 
         uniformLocations.insert({name, i});
     }

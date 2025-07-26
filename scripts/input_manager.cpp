@@ -47,6 +47,13 @@ InputManager::InputManager()
     realTimeScrollDelta = {};
 }
 
+void InputManager::initialize_callbacks(GLFWwindow *window)
+{
+	glfwSetKeyCallback(window, on_key_glfw_callback);
+	glfwSetScrollCallback(window, on_scroll_glfw_callback);
+	glfwSetCursorPosCallback(window, on_cursor_move_glfw_callback);
+}
+
 bool InputManager::is_key_pressed_this_frame(int key)
 {
     KeyStateInfo keyState = allKeyStates[key];
@@ -101,10 +108,27 @@ void InputManager::initialize_frame(GLFWwindow* window, double deltaTime)
     {
         cursorDelta = cursorPos - lastMousePos;
     }
-    std::cout << "cursorDelta : " << glm::to_string(cursorDelta) << "\n";
 
     scrollDelta = realTimeScrollDelta;
     realTimeScrollDelta = glm::vec2(0, 0);
+}
+
+void InputManager::on_key_glfw_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+    InputManager* inputManager = InputManager::get_input_manager(window);
+	inputManager->on_key_glfw(window, key, scancode, action, mods);
+}
+
+void InputManager::on_scroll_glfw_callback(GLFWwindow *window, double xoffset, double yoffset)
+{
+    InputManager* inputManager = InputManager::get_input_manager(window);
+	inputManager->on_scroll_glfw(window, xoffset, yoffset);
+}
+
+void InputManager::on_cursor_move_glfw_callback(GLFWwindow *window, double x, double y)
+{
+    InputManager* inputManager = InputManager::get_input_manager(window);
+	inputManager->on_cursor_move_glfw(window, x, y);
 }
 
 void InputManager::on_key_glfw(GLFWwindow* window, int key, int scancode, int action, int mods)
