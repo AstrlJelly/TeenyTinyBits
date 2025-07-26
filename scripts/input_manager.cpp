@@ -71,9 +71,9 @@ bool InputManager::is_key_released(int key)
     return keyState.is_in_state(KEY_RELEASED);
 }
 
-glm::vec2 InputManager::get_mouse_delta()
+glm::vec2 InputManager::get_cursor_delta()
 {
-    return mouseDelta;
+    return cursorDelta;
 }
 
 glm::vec2 InputManager::get_scroll_delta()
@@ -85,22 +85,24 @@ void InputManager::initialize_frame(GLFWwindow* window, double deltaTime)
 {
     lastFrameStartTime = frameStartTime;
     frameStartTime = glfwGetTime();
-    bool lastMouseFocused = mouseFocused;
-    mouseFocused = glfwGetWindowAttrib(window, GLFW_FOCUSED);
+    bool lastMouseFocused = cursorFocused;
+    cursorFocused = glfwGetWindowAttrib(window, GLFW_FOCUSED);
 
-    glm::vec<2, double> cursorPos{};
-    glfwGetCursorPos(window, &cursorPos.x, &cursorPos.y);
-    // mouseDelta = static_cast<glm::vec2>(cursorPos) - lastMousePos;
-    if (mouseFocused != lastMouseFocused)
+    glm::vec2 lastMousePos = cursorPos;
+    glm::vec<2, double> cursorPosD{};
+    glfwGetCursorPos(window, &cursorPosD.x, &cursorPosD.y);
+    this->cursorPos = cursorPosD;
+    
+    if ((cursorFocused || lastMouseFocused) && (cursorFocused != lastMouseFocused))
     {
-        lastMousePos = cursorPos;
-        mouseDelta = static_cast<glm::vec2>(cursorPos) - lastMousePos;
+        cursorDelta = glm::vec2(0, 0);
     }
     else
     {
-        mouseDelta = static_cast<glm::vec2>(cursorPos) - lastMousePos;
-        lastMousePos = cursorPos;
+        cursorDelta = cursorPos - lastMousePos;
     }
+    std::cout << "cursorDelta : " << glm::to_string(cursorDelta) << "\n";
+
     scrollDelta = realTimeScrollDelta;
     realTimeScrollDelta = glm::vec2(0, 0);
 }
@@ -113,6 +115,12 @@ void InputManager::on_key_glfw(GLFWwindow* window, int key, int scancode, int ac
     KeyState newState = action == GLFW_PRESS ? KEY_PRESSED : KEY_RELEASED;
     KeyStateInfo keyStateInfo = KeyStateInfo(newState, mods);
     allKeyStates.insert_or_assign(key, keyStateInfo);
+}
+
+void InputManager::on_cursor_move_glfw(GLFWwindow* window, double x, double y)
+{
+    // realTimeMouseDelta += glm::vec2(x / 1000, y / 1000);
+    // std::cout << "realTimeMouseDelta : " << glm::to_string(realTimeMouseDelta) << "\n";
 }
 
 void InputManager::on_scroll_glfw(GLFWwindow* window, double xoffset, double yoffset)

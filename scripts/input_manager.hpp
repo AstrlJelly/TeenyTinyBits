@@ -4,6 +4,9 @@
 #include <map>
 
 #include "GLFW/glfw3.h"
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/glm/gtx/string_cast.hpp"
 #include "glm/glm/ext/vector_float2.hpp"
 
 typedef uint32_t KeyState;
@@ -34,12 +37,14 @@ class InputManager
 
     double frameStartTime;
     double lastFrameStartTime;
-    bool mouseFocused;
+    bool cursorFocused;
 
-    glm::vec2 mouseDelta;
-    glm::vec2 lastMousePos;
+    // only stored for one purpose, but it's good to have it here
+    glm::vec2 cursorPos;
+    glm::vec2 cursorDelta;
+
     glm::vec2 scrollDelta;
-    // shouldn't really be used, it's highly likely that this changes throughout the frame
+    // // shouldn't really be used, it's highly likely that this changes throughout the frame
     glm::vec2 realTimeScrollDelta;
 
 public:
@@ -51,11 +56,12 @@ public:
     bool is_key_released_this_frame(int key);
     bool is_key_released(int key);
 
-    glm::vec2 get_mouse_delta();
+    glm::vec2 get_cursor_delta();
     glm::vec2 get_scroll_delta();
 
     void initialize_frame(GLFWwindow* window, double deltaTime);
 
     void on_key_glfw(GLFWwindow *window, int key, int scancode, int action, int mods);
+    void on_cursor_move_glfw(GLFWwindow *window, double x, double y);
     void on_scroll_glfw(GLFWwindow *window, double xoffset, double yoffset);
 };

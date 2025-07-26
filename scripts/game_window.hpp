@@ -36,7 +36,3 @@ public:
 
     double get_delta_time();
 };
-
-static void key_glfw_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
-static void scroll_glfw_callback(GLFWwindow *window, double xoffset, double yoffset);
-static void framebuffer_size_glfw_callback(GLFWwindow* window, int width, int height);

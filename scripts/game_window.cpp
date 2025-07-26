@@ -26,34 +26,9 @@ GameWindow::GameWindow(glm::vec2 size, const char* title)
 		exit(1);
 	}
 
-	glEnable(GL_DEPTH_TEST);
-
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_glfw_callback);
-	glfwSetKeyCallback(window, key_glfw_callback);
-	glfwSetScrollCallback(window, scroll_glfw_callback);
+	glfwSwapInterval(0);
 
     this->inputManager = new InputManager();
-}
-
-static void key_glfw_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
-{
-    GameWindow* gw = GameWindow::get_game_window(window);
-    InputManager* inputManager = gw->get_input_manager();
-
-	inputManager->on_key_glfw(window, key, scancode, action, mods);
-}
-
-static void scroll_glfw_callback(GLFWwindow *window, double xoffset, double yoffset)
-{
-    GameWindow* gw = GameWindow::get_game_window(window);
-    InputManager* inputManager = gw->get_input_manager();
-
-	inputManager->on_scroll_glfw(window, xoffset, yoffset);
-}
-
-static void framebuffer_size_glfw_callback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
 }
 
 GameWindow::~GameWindow()
@@ -217,13 +192,17 @@ void GameWindow::start_game_loop()
 
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	if (glfwRawMouseMotionSupported())
+	{
+    	glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+	}
 
 	while (!glfwWindowShouldClose(window))
 	{
 		this->initialize_frame();
 		inputManager->initialize_frame(window, deltaTime);
 		float deltaTimeF = deltaTime;
-		glm::vec2 mouseDelta = inputManager->get_mouse_delta();
+		glm::vec2 cursorDelta = inputManager->get_cursor_delta();
 		glm::vec2 scrollDelta = inputManager->get_scroll_delta();
 
 
@@ -271,6 +250,14 @@ void GameWindow::start_game_loop()
 		{
 			cameraPos -= moveAmount * cameraFront;
 		}
+		if (inputManager->is_key_pressed(GLFW_KEY_LEFT_SHIFT))
+		{
+			cameraPos += moveAmount * cameraUp;
+		}
+		if (inputManager->is_key_pressed(GLFW_KEY_LEFT_CONTROL))
+		{
+			cameraPos -= moveAmount * cameraUp;
+		}
 		if (inputManager->is_key_pressed(GLFW_KEY_A))
 		{
 			cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * moveAmount;
@@ -281,8 +268,8 @@ void GameWindow::start_game_loop()
 		}
 
 		const float sensitivity = 0.1f;
-		yaw   += mouseDelta.x * sensitivity;
-		pitch += -mouseDelta.y * sensitivity;
+		yaw   += cursorDelta.x * sensitivity;
+		pitch += -cursorDelta.y * sensitivity;
 
 		pitch = std::clamp(pitch, -89.0, 89.0);
 
@@ -335,30 +322,10 @@ void GameWindow::start_game_loop()
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		// glActiveTexture(GL_TEXTURE0);
-		// glBindTexture(GL_TEXTURE_2D, texture1);
-		// glActiveTexture(GL_TEXTURE1);
-		// glBindTexture(GL_TEXTURE_2D, texture2);
-		
-		// glBindVertexArray(VAO);
-		// for (unsigned int j = 0; j < cubePositions.size(); j++)
-		// {
-		// 	int i = j % cubePositions.size();
-			
-		// 	glm::mat4 model = glm::mat4(1.0f);
-		// 	model = glm::translate(model, cubePositions[i]);
-		// 	float angle = 20.0f * i;
-		// 	model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-		// 	lightingShader.set_mat4("relativeModel", projection * view * model);
-
-		// 	glDrawArrays(GL_TRIANGLES, 0, 36);
-		// }
-
 		// not technically necessary but it can make things more consistent
 		glBindVertexArray(0);
 
 		/// end rendering
-
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
