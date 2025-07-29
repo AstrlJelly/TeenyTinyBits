@@ -16,7 +16,7 @@ constexpr KeyState KEY_PRESSED  = 1 << 1;
 class KeyStateInfo
 {
     KeyState state;
-    int mods;
+    int modState;
     double timestamp;
 
 public:
@@ -28,6 +28,8 @@ public:
 
     bool is_in_state(KeyState state);
     KeyState get_state();
+    bool is_in_mod_state(int modState);
+    KeyState get_mod_state();
 };
 
 class InputManager
@@ -45,13 +47,13 @@ class InputManager
     glm::vec2 cursorDelta;
 
     glm::vec2 scrollDelta;
-    // // shouldn't really be used, it's highly likely that this changes throughout the frame
+    // shouldn't really be used, it's highly likely that this changes throughout the frame
     glm::vec2 realTimeScrollDelta;
 
-    static void on_key_glfw_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+    static void on_key_glfw_callback         (GLFWwindow *window, int key, int scancode, int action, int mods);
     static void on_mouse_button_glfw_callback(GLFWwindow *window, int button, int action, int mods);
-    static void on_cursor_move_glfw_callback(GLFWwindow *window, double x, double y);
-    static void on_scroll_glfw_callback(GLFWwindow *window, double xoffset, double yoffset);
+    static void on_cursor_move_glfw_callback (GLFWwindow *window, double x, double y);
+    static void on_scroll_glfw_callback      (GLFWwindow *window, double xoffset, double yoffset);
 
 public:
     InputManager();
@@ -61,15 +63,17 @@ public:
 
     KeyStateInfo operator[](int key);
 
-    bool is_key_pressed_this_frame(int key);
-    bool is_key_pressed(int key);
-    bool is_key_released_this_frame(int key);
-    bool is_key_released(int key);
+    // key can be a an integer, like GLFW_KEY_A or GLFW_KEY_TAB
+    // mods can be a bitfield containing GLFW_MOD_SHIFT, GLFW_MOD_CTRL, etc
+    bool is_key_pressed_this_frame (int key, int mods = 0);
+    bool is_key_pressed            (int key, int mods = 0);
+    bool is_key_released_this_frame(int key, int mods = 0);
+    bool is_key_released           (int key, int mods = 0);
 
-    bool is_mouse_button_pressed_this_frame(int button);
-    bool is_mouse_button_pressed(int button);
-    bool is_mouse_button_released_this_frame(int button);
-    bool is_mouse_button_released(int button);
+    bool is_mouse_button_pressed_this_frame (int button, int mods = 0);
+    bool is_mouse_button_pressed            (int button, int mods = 0);
+    bool is_mouse_button_released_this_frame(int button, int mods = 0);
+    bool is_mouse_button_released           (int button, int mods = 0);
 
     glm::vec2 get_cursor_delta();
     // implies that raw cursor data will be retrieved if supported
@@ -79,8 +83,9 @@ public:
     void initialize_frame(GLFWwindow* window, double deltaTime);
 
     static void initialize_callbacks(GLFWwindow* window);
-    void on_key_glfw(GLFWwindow *window, int key, int scancode, int action, int mods);
+
+    void on_key_glfw         (GLFWwindow *window, int key, int scancode, int action, int mods);
     void on_mouse_button_glfw(GLFWwindow *window, int button, int action, int mods);
-    void on_cursor_move_glfw(GLFWwindow *window, double x, double y);
-    void on_scroll_glfw(GLFWwindow *window, double xoffset, double yoffset);
+    void on_cursor_move_glfw (GLFWwindow *window, double x, double y);
+    void on_scroll_glfw      (GLFWwindow *window, double xoffset, double yoffset);
 };

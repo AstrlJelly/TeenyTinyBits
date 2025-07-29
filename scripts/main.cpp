@@ -15,7 +15,6 @@ int main(void)
 
 	glfwInit();
 
-
 	GameWindow* gw = new GameWindow(glm::vec2(1600, 1280), "TeenyTinyBits");
 	GLFWwindow* window = gw->get_window();
 
@@ -28,6 +27,8 @@ int main(void)
 	gw->start_game_loop();
 
 	glfwTerminate();
+	// ImGui::DestroyContext();
+
 	return 0;
 }
 

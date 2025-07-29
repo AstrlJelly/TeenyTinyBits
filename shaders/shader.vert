@@ -8,21 +8,19 @@ uniform mat4 model;
 out vec2 TexCoords;
 
 struct Object {
-    float radius;
     vec2 position;
     vec2 velocity;
+    float radius;
 };
 
-restrict layout (binding = 2, std430) buffer AllObjectsLayout
+restrict layout (binding = 0, std430) buffer AllObjectsLayout
 {
     Object[] allObjects;
 };
 
 void main()
 {
-    // gl_Position = ortho * view * model * vec4(aPos, 1.0);
-    // Object currentObject = allObjects[gl_InstanceID];
-    // gl_Position = view * model * vec4(currentObject.position, 0.0, 1.0);
-    gl_Position = view * model * vec4(aPos, 1.0);
+    Object currentObject = allObjects[gl_InstanceID];
+    gl_Position = view * model * (vec4(aPos + vec3(currentObject.position, 1.0), 1.0));
     TexCoords = aTexCoords;
 }

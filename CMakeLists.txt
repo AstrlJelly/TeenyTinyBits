@@ -15,8 +15,10 @@ add_executable(${PROJECT_NAME}
     ${PROJECT_INCLUDE_DIR}/glad/glad.c
 
     # imgui
-    ${PROJECT_INCLUDE_DIR}/ImGui/imgui_impl_opengl3.cpp
+    ${PROJECT_INCLUDE_DIR}/ImGui/backends/imgui_impl_glfw.cpp
+    ${PROJECT_INCLUDE_DIR}/ImGui/backends/imgui_impl_opengl3.cpp
     ${PROJECT_INCLUDE_DIR}/ImGui/imgui.cpp
+    ${PROJECT_INCLUDE_DIR}/ImGui/imgui_demo.cpp
     ${PROJECT_INCLUDE_DIR}/ImGui/imgui_draw.cpp
     ${PROJECT_INCLUDE_DIR}/ImGui/imgui_tables.cpp
     ${PROJECT_INCLUDE_DIR}/ImGui/imgui_widgets.cpp

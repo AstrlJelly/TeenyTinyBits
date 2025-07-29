@@ -1,19 +1,73 @@
 #include "shader.hpp"
+#include "main.hpp"
 #include <GL/glext.h>
 #include <cstdarg>
 
-Shader::Shader(const char* vertexPath, const char* fragmentPath)
+Shader::Shader(uint shaderCount, ...)
 {
-    unsigned int vertex = compile_shader(vertexPath, GL_VERTEX_SHADER);
-    unsigned int fragment = compile_shader(fragmentPath, GL_FRAGMENT_SHADER);
+    std::va_list args;
+
+    GLuint shaderIds[shaderCount];
+    va_start(args, shaderCount);
+    for (int i = 0; i < shaderCount; i++) {
+        int shaderType = va_arg(args, int);
+        const char* shaderPath = va_arg(args, const char*);
+        shaderIds[i] = compile_shader(shaderPath, shaderType);
+    }
+    va_end(args);
 
     // shader Program
-    ID = create_program(2, vertex, fragment);
+    this->programID = glCreateProgram();
+    for (int i = 0; i < shaderCount; i++) {
+        GLuint shaderId = shaderIds[i];
+        glAttachShader(programID, shaderId);
+    }
+    glLinkProgram(programID);
+    
+    int success;
+    char infoLog[512];
+    // print linking errors if any
+    glGetProgramiv(programID, GL_LINK_STATUS, &success);
+    if (!success)
+    {
+        glGetProgramInfoLog(programID, 512, NULL, infoLog);
+        std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+        exit(1);
+    }
+    
+    // delete the shaders as they're linked into our program now and no longer necessary
+    for (int i = 0; i < shaderCount; i++) {
+        GLuint shaderId = shaderIds[i];
+        glDeleteShader(shaderId);
+    }
 
     this->update_uniforms();
 }
 
-unsigned int compile_shader(const char* path, int shaderType)
+ComputeShader::ComputeShader(const char* computePath) 
+    : Shader(1,
+        GL_COMPUTE_SHADER, computePath
+    ) {}
+
+void ComputeShader::dispatch_indirect()
+{
+    this->use();
+    glDispatchComputeIndirect(0);
+}
+
+void ComputeShader::dispatch(int x, int y, int z)
+{
+    this->use();
+    glDispatchCompute(x, y, z);
+}
+
+PipelineShader::PipelineShader(const char* vertexPath, const char* fragmentPath)
+    : Shader(2,
+        GL_VERTEX_SHADER, vertexPath,
+        GL_FRAGMENT_SHADER, fragmentPath
+    ) {}
+
+GLuint compile_shader(const char* path, int shaderType)
 {
     std::string code;
     std::ifstream shaderFile;
@@ -38,7 +92,7 @@ unsigned int compile_shader(const char* path, int shaderType)
     const char* shaderCode = code.c_str();
 
     // 2. compile shaders
-    unsigned int shaderID;
+    uint shaderID;
     int success;
     char infoLog[512];
     
@@ -58,36 +112,6 @@ unsigned int compile_shader(const char* path, int shaderType)
     return shaderID;
 }
 
-unsigned int create_program(int count, ...)
-{
-    std::va_list args;
-    va_start(args, count);
-    
-    unsigned int ID = glCreateProgram();
-    for (int i = 0; i < count; i++) {
-        glAttachShader(ID, va_arg(args, GLuint));
-    }
-    glLinkProgram(ID);
-    
-    int success;
-    char infoLog[512];
-    // print linking errors if any
-    glGetProgramiv(ID, GL_LINK_STATUS, &success);
-    if (!success)
-    {
-        glGetProgramInfoLog(ID, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-        throw;
-    }
-    
-    // delete the shaders as they're linked into our program now and no longer necessary
-    for (int i = 0; i < count; i++) {
-        glDeleteShader(va_arg(args, GLuint));
-    }
-
-    return ID;
-}
-
 void Shader::update_uniforms()
 {
     // variables of uniforms
@@ -100,12 +124,12 @@ void Shader::update_uniforms()
     GLchar name[bufSize]; // variable name in GLSL
     GLsizei length; // name length
 
-    glGetProgramiv(ID, GL_ACTIVE_UNIFORMS, &count);
+    glGetProgramiv(programID, GL_ACTIVE_UNIFORMS, &count);
 
     uniformLocations = {};
     for (GLint i = 0; i < count; i++)
     {
-        glGetActiveUniform(ID, i, bufSize, &length, &size, &type, name);
+        glGetActiveUniform(programID, i, bufSize, &length, &size, &type, name);
 
         uniformLocations.insert({name, i});
     }
@@ -113,7 +137,7 @@ void Shader::update_uniforms()
 
 void Shader::use() 
 { 
-    glUseProgram(ID);
+    glUseProgram(programID);
 }
 
 GLint Shader::get_uniform_location(const std::string &name) const
@@ -125,7 +149,7 @@ GLint Shader::get_uniform_location(const std::string &name) const
     }
     else
     {
-        GLint location = glGetUniformLocation(ID, name.c_str());
+        GLint location = glGetUniformLocation(programID, name.c_str());
         if (location < 0)
         {
             std::cerr << "Uniform with name \"" << name << "\" was not found in cache. Did you spell it wrong, or are you not using this uniform in your glsl code?\n";

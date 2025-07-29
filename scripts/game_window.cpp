@@ -1,16 +1,6 @@
 #include "game_window.hpp"
 #include "GLFW/glfw3.h"
-#include "glm/glm/ext/matrix_clip_space.hpp"
-#include "glm/glm/ext/matrix_transform.hpp"
-#include "glm/glm/fwd.hpp"
-#include "glm/glm/geometric.hpp"
-#include "glm/glm/matrix.hpp"
-#include "input_manager.hpp"
-#include "main.hpp"
 #include "shader.hpp"
-#include <algorithm>
-#include <cmath>
-#include <ostream>
 
 GameWindow::GameWindow(glm::vec2 size, const char* title)
 {
@@ -46,6 +36,14 @@ GameWindow::~GameWindow()
 
 void GameWindow::start_game_loop()
 {
+	// IMGUI_CHECKVERSION();
+	// ImGui::CreateContext();
+	// ImGuiIO& io = ImGui::GetIO();
+	// io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	// io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    // ImGui_ImplGlfw_InitForOpenGL(window, true);
+	// ImGui_ImplOpenGL3_Init();
+
     // cube :]
 	float vertices[] = {
 		 // positions         // texture coords
@@ -58,7 +56,7 @@ void GameWindow::start_game_loop()
 	};
 
     // first, configure the cube's VAO (and VBO)
-    unsigned int VBO, VAO;
+    uint VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
 
@@ -73,14 +71,19 @@ void GameWindow::start_game_loop()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
+	GLuint objectsBuffer;
+	glCreateBuffers(1, &objectsBuffer);
+	glNamedBufferStorage(objectsBuffer, sizeof(PhysicsObject) * TEMP_MAX_OBJECTS, nullptr, GL_DYNAMIC_STORAGE_BIT);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, objectsBuffer);
 	
-	Shader lightingShader = Shader("./shaders/shader.vert", "./shaders/shader.frag");
-	// ComputeShader computeShader = ComputeShader("./shaders/bits.comp");
+	PipelineShader shader = PipelineShader("./shaders/shader.vert", "./shaders/shader.frag");
+	ComputeShader velocityCompute = ComputeShader("./shaders/velocity.comp");
+	ComputeShader positionCompute = ComputeShader("./shaders/position.comp");
 
 	stbi_set_flip_vertically_on_load(true);
 
 	/// texture stuff
-	unsigned int diffuseMap;
+	uint diffuseMap;
 	glGenTextures(1, &diffuseMap);
 	glBindTexture(GL_TEXTURE_2D, diffuseMap);
 	// set the texture wrapping/filtering options (on the currently bound texture object)
@@ -106,20 +109,48 @@ void GameWindow::start_game_loop()
 	float zoomLevel = 1;
 	const float minZoomLevel = 0.001, maxZoomLevel = 100;
 
+	int objectCount = 4;
+	std::vector<PhysicsObject> objectsToAdd{};
+
 	while (!glfwWindowShouldClose(window))
 	{
 		/// initialization stuff
 		this->initialize_frame();
 		inputManager->initialize_frame(window, deltaTime);
+
+		// ImGui_ImplOpenGL3_NewFrame();
+		// ImGui_ImplGlfw_NewFrame();
+		// ImGui::NewFrame();
+
 		float deltaTimeF = deltaTime;
+
 		glm::vec2 cursorDelta = inputManager->get_cursor_delta();
-		glm::vec2 focusedCursorDelta = this->get_focused_cursor_delta();
+		glm::vec2 focusedCursorDelta = this->get_cursor_delta_if_focused();
 		glm::vec2 relativeCursorDelta = this->get_relative_cursor_delta();
 		glm::vec2 scrollDelta = inputManager->get_scroll_delta();
 
+		glm::vec2 windowSize = this->get_window_size();
+		// glm::vec2 windowPos = this->get_window_pos();
+
+		// float zoomLevelLog = log(zoomLevel);
+		
 		glm::mat4 view = glm::mat4(1.0f);
+		
+		glm::vec2 zoomScale = glm::vec2(zoomLevel);
+		view = glm::scale(view, glm::vec3(zoomScale, 1));
+
 		view = glm::translate(view, cameraPos);
-		view = glm::scale(view, glm::vec3(zoomLevel, zoomLevel, 1));
+
+		glm::vec2 windowScale = glm::vec2(windowSize.y, windowSize.x);
+		if (windowSize.x < windowSize.y)
+		{
+			windowScale /= glm::vec2(windowSize.y);
+		}
+		else // if x is greater or equal to y
+		{
+			windowScale /= glm::vec2(windowSize.x);
+		}
+		view = glm::scale(view, glm::vec3(windowScale, 1));
 
 		glm::mat4 model = glm::mat4(1.0f);
 
@@ -127,13 +158,25 @@ void GameWindow::start_game_loop()
 
 		/// input stuff
 
-        const float cameraSpeed = 0.05f; // adjust accordingly
-
         if (inputManager->is_mouse_button_pressed(GLFW_MOUSE_BUTTON_1)) {
 			glm::vec3 moveCam = glm::vec3(relativeCursorDelta.x, -relativeCursorDelta.y, 0.0);
+			moveCam /= zoomLevel;
 			cameraPos += moveCam;
         }
-
+		if (inputManager->is_key_pressed_this_frame(GLFW_KEY_TAB, GLFW_MOD_SHIFT))
+		{
+			std::cout << "cameraPos = " << glm::to_string(cameraPos) << "\n";
+			std::cout << "windowScale = " << glm::to_string(windowScale) << "\n";
+        } 
+		else if (inputManager->is_key_pressed_this_frame(GLFW_KEY_TAB))
+		{
+			PhysicsObject* data = new PhysicsObject[TEMP_MAX_OBJECTS]();
+			glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(PhysicsObject) * objectCount, data);
+			for (int i = 0; i < objectCount; i++) {
+				PhysicsObject object = data[i];
+				std::cout << i << " : object.velocity : " << glm::to_string(object.velocity) << "\n";
+			}
+		}
         if (inputManager->is_key_pressed_this_frame(GLFW_KEY_T))
         {
 			GLint polygonMode;
@@ -152,33 +195,59 @@ void GameWindow::start_game_loop()
         if (inputManager->is_key_pressed_this_frame(GLFW_KEY_ESCAPE)) {
             glfwSetWindowShouldClose(window, true);
         }
-        if (inputManager->is_key_pressed_this_frame(GLFW_KEY_TAB)) {
-			std::cout << "cameraPos = " << glm::to_string(cameraPos) << "\n";
-        }
         if (inputManager->is_key_pressed_this_frame(GLFW_KEY_F)) {
-			this->set_cursor_mode(get_cursor_mode() == GLFW_CURSOR_DISABLED ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+			int newMode = (get_cursor_mode() == GLFW_CURSOR_DISABLED) ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED;
+			this->set_cursor_mode(newMode);
         }
+		if (inputManager->is_key_pressed_this_frame(GLFW_KEY_E)) {
+			std::cout << "spawn object " << objectCount << "\n";
+			objectCount += 1000;
+		}
+		if (inputManager->is_key_pressed(GLFW_KEY_R)) {
+			std::cout << "spawn object " << objectCount << "\n";
+			objectCount++;
+			objectsToAdd.push_back(PhysicsObject());
+			glBufferSubData(GL_SHADER_STORAGE_BUFFER, objectCount, sizeof(PhysicsObject) * objectsToAdd.size(), objectsToAdd.data());
+		}
 
-		zoomLevel += (zoomLevel * (-scrollDelta.y / 10.0));
-		zoomLevel = std::clamp(zoomLevel, minZoomLevel, maxZoomLevel);
+		// creates an effect where zooming gets stronger the more you zoom in or out
+		zoomLevel += (zoomLevel * -scrollDelta.y) / 10;
 
 		/// end input
 
+		/// logic
+		velocityCompute.dispatch(objectCount, 1, 1);
+		glFinish();
+		positionCompute.dispatch(objectCount, 1, 1);
+		glFinish();
+
+		/// end logic
+
 		/// rendering
 
-		lightingShader.use();
+		// ImGui::ShowDemoWindow();
 
-		// lightingShader.set_mat4("ortho", ortho);
-		lightingShader.set_mat4("view", view);
-		lightingShader.set_mat4("model", model);
+		shader.use();
+
+		shader.set_mat4("view", view);
+		shader.set_mat4("model", model);
 
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glDrawArraysInstanced(GL_TRIANGLES, 0, 6, objectCount);
 
 		// not technically necessary but it can make things more consistent
 		glBindVertexArray(0);
 
+		// ImGui::EndFrame();
+
+		// ImGui::Render();
+		// ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 		/// end rendering
+
+		/// more logic
+		objectsToAdd.resize(0);
+		///
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -193,6 +262,9 @@ void GameWindow::initialize_frame()
 	double time = glfwGetTime();
 	deltaTime = time - lastFrameTime;
 	lastFrameTime = time;
+
+	// ImGui_ImplOpenGL3_NewFrame();
+	// ImGui::NewFrame();
 }
 
 GameWindow* GameWindow::get_game_window(GLFWwindow* window)
@@ -220,7 +292,36 @@ double GameWindow::get_delta_time()
 	return deltaTime;
 }
 
-glm::vec2 GameWindow::get_focused_cursor_delta()
+glm::vec2 GameWindow::get_window_size()
+{
+	glm::vec<2, int> windowSize{};
+	glfwGetWindowSize(window, &windowSize.x, &windowSize.y);
+	return static_cast<glm::vec2>(windowSize);
+}
+
+glm::vec2 GameWindow::get_window_pos()
+{
+	glm::vec<2, int> windowPos{};
+	glfwGetWindowPos(window, &windowPos.x, &windowPos.y);
+	return static_cast<glm::vec2>(windowPos);
+}
+
+int GameWindow::get_cursor_mode()
+{
+	return glfwGetInputMode(window, GLFW_CURSOR);
+}
+
+void GameWindow::set_cursor_mode(int mode)
+{
+    glfwSetInputMode(window, GLFW_CURSOR, mode);
+	
+	if (glfwRawMouseMotionSupported())
+	{
+		glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, (mode == GLFW_CURSOR_DISABLED));
+	}
+}
+
+glm::vec2 GameWindow::get_cursor_delta_if_focused()
 {
 	if (get_cursor_mode() == GLFW_CURSOR_DISABLED)
 	{
@@ -238,17 +339,6 @@ glm::vec2 GameWindow::get_relative_cursor_delta()
 	glfwGetWindowSize(window, &windowSize.x, &windowSize.y);
 	glm::vec2 windowSizeF = windowSize;
 	return (inputManager->get_cursor_delta() * glm::vec2(2)) / windowSizeF;
-}
-
-int GameWindow::get_cursor_mode()
-{
-	return glfwGetInputMode(window, GLFW_CURSOR);
-}
-
-void GameWindow::set_cursor_mode(int mode)
-{
-    glfwSetInputMode(window, GLFW_CURSOR, mode);
-	glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, (mode == GLFW_CURSOR_DISABLED));
 }
 
 InputManager* InputManager::get_input_manager(GLFWwindow* window)
