@@ -12,7 +12,7 @@ Shader::Shader(uint shaderCount, ...)
     for (int i = 0; i < shaderCount; i++) {
         int shaderType = va_arg(args, int);
         const char* shaderPath = va_arg(args, const char*);
-        shaderIds[i] = compile_shader(shaderPath, shaderType);
+        shaderIds[i] = compile_shader(shaderType, shaderPath);
     }
     va_end(args);
 
@@ -67,7 +67,7 @@ PipelineShader::PipelineShader(const char* vertexPath, const char* fragmentPath)
         GL_FRAGMENT_SHADER, fragmentPath
     ) {}
 
-GLuint compile_shader(const char* path, int shaderType)
+GLuint compile_shader(int shaderType, const char* path)
 {
     std::string code;
     std::ifstream shaderFile;

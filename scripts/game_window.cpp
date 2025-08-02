@@ -4,9 +4,11 @@
 
 GameWindow::GameWindow(glm::vec2 size, const char* title)
 {
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	if (!glfwInitialized)
+	{
+		init_glfw();
+		glfwInitialized = true;
+	}
 
 	this->window = glfwCreateWindow(size.x, size.y, title, NULL, NULL);
 	if (window == NULL)
@@ -17,16 +19,33 @@ GameWindow::GameWindow(glm::vec2 size, const char* title)
 	}
 	glfwMakeContextCurrent(window);
 	glfwSetWindowUserPointer(window, this);
+	glfwSwapInterval(1);
 
+	if (!gladInitialized)
+	{
+		init_glad();
+		gladInitialized = true;
+	}
+
+    this->inputManager = new InputManager();
+}
+
+void init_glfw()
+{
+	glfwInit();
+			
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+}
+
+void init_glad()
+{
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cerr << "Failed to initialize GLAD" << std::endl;
 		exit(1);
 	}
-
-	glfwSwapInterval(1);
-
-    this->inputManager = new InputManager();
 }
 
 GameWindow::~GameWindow()
@@ -168,7 +187,7 @@ void GameWindow::start_game_loop()
 			std::cout << "cameraPos = " << glm::to_string(cameraPos) << "\n";
 			std::cout << "windowScale = " << glm::to_string(windowScale) << "\n";
         } 
-		else if (inputManager->is_key_pressed_this_frame(GLFW_KEY_TAB))
+		// else if (inputManager->is_key_pressed_this_frame(GLFW_KEY_TAB))
 		{
 			PhysicsObject* data = new PhysicsObject[TEMP_MAX_OBJECTS]();
 			glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(PhysicsObject) * objectCount, data);
@@ -282,11 +301,6 @@ GLFWwindow* GameWindow::get_window()
     return window;
 }
 
-InputManager* GameWindow::get_input_manager()
-{
-    return inputManager;
-}
-
 double GameWindow::get_delta_time()
 {
 	return deltaTime;
@@ -339,10 +353,4 @@ glm::vec2 GameWindow::get_relative_cursor_delta()
 	glfwGetWindowSize(window, &windowSize.x, &windowSize.y);
 	glm::vec2 windowSizeF = windowSize;
 	return (inputManager->get_cursor_delta() * glm::vec2(2)) / windowSizeF;
-}
-
-InputManager* InputManager::get_input_manager(GLFWwindow* window)
-{
-	GameWindow* gw = GameWindow::get_game_window(window);
-	return gw->get_input_manager();
 }

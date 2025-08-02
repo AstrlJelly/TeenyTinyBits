@@ -13,7 +13,6 @@ int main(void)
 						      << TeenyTinyBits_VERSION_MAJOR << '.'
 						      << TeenyTinyBits_VERSION_PATCH << '\n';
 
-	glfwInit();
 
 	GameWindow* gw = new GameWindow(glm::vec2(1600, 1280), "TeenyTinyBits");
 	GLFWwindow* window = gw->get_window();

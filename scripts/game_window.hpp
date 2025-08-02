@@ -21,6 +21,7 @@
 
 #define TEMP_MAX_OBJECTS 0xFFFF
 
+
 class GameWindow
 {
 private:
@@ -29,6 +30,9 @@ private:
 
     double deltaTime;
     double lastFrameTime;
+
+    bool glfwInitialized : 1;
+    bool gladInitialized : 1;
     
 public:
     GameWindow(glm::vec2 size, const char* title);
@@ -55,3 +59,7 @@ public:
 
     glm::vec2 get_relative_cursor_delta();
 };
+
+void init_glfw();
+void init_glad();
+    

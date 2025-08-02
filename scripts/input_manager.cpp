@@ -1,3 +1,4 @@
+#include "game_window.hpp"
 #include "input_manager.hpp"
 
 KeyStateInfo::KeyStateInfo(KeyState state, int mods)
@@ -41,11 +42,16 @@ KeyState KeyStateInfo::get_state()
 }
 
 
-
 InputManager::InputManager()
 {
     allKeyStates = {};
     realTimeScrollDelta = {};
+}
+
+InputManager* InputManager::get_input_manager(GLFWwindow* window)
+{
+	GameWindow* gw = GameWindow::get_game_window(window);
+	return gw->get_input_manager();
 }
 
 void InputManager::initialize_callbacks(GLFWwindow *window)

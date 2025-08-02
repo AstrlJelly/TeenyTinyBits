@@ -1,15 +1,7 @@
 #version 460 core
+#extension GL_ARB_shading_language_include : require
 
-struct Object {
-    vec2 position;
-    vec2 velocity;
-    float radius;
-};
-
-layout (binding = 0, std430) buffer AllObjectsLayout
-{
-    Object[] allObjects;
-};
+#include "physics_object.glsl"
 
 highp float random(vec2 co)
 {

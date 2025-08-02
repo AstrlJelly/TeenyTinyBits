@@ -57,8 +57,6 @@ class InputManager
 
 public:
     InputManager();
-    // defined in game_window.cpp, since including
-    // it here would lead to a circular dependency
     static InputManager* get_input_manager(GLFWwindow* window);
 
     KeyStateInfo operator[](int key);

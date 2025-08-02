@@ -17,27 +17,35 @@
 class Shader
 {
 private:
+    // the program ID
+    GLuint programID;
+
     void update_uniforms();
     
 public:
-    // the program ID
-    GLuint programID;
 
     // variable name, location
     std::map<std::string, GLint> uniformLocations;
   
+    // might be useful if shaders will be created outside of
+    // this class
+    // Shader(GLuint program);
     // constructor reads and builds the shader
     Shader(uint argc, ...);
+
     // use/activate the shader
     void use();
+
     // utility uniform functions
     GLint get_uniform_location(const std::string& name) const;
-    void set_bool (const std::string &name, bool value)                   const;
-    void set_int  (const std::string &name, int value)                    const;
-    void set_float(const std::string &name, float value)                  const;
-    void set_vec3 (const std::string &name, glm::vec3 value)              const;
-    void set_vec3 (const std::string &name, double x, double y, double z) const;
-    void set_mat4 (const std::string &name, glm::mat4 value)              const;
+    void set_bool (const std::string& name, bool value)                   const;
+    void set_int  (const std::string& name, int value)                    const;
+    void set_float(const std::string& name, float value)                  const;
+    void set_vec3 (const std::string& name, glm::vec3 value)              const;
+    void set_vec3 (const std::string& name, double x, double y, double z) const;
+    void set_mat4 (const std::string& name, glm::mat4 value)              const;
+
+    static bool is_shader(GLuint programID);
 };
 
 class PipelineShader : public Shader
@@ -57,6 +65,7 @@ public:
 
 struct PhysicsObject
 {
+    PhysicsObject(glm::vec2 position = glm::vec2(0), glm::vec2 velocity = glm::vec2(0), float radius = 1);
     glm::vec2 position;
     glm::vec2 velocity;
     float radius;
@@ -65,5 +74,5 @@ struct PhysicsObject
     // glm::vec3 __buffer;
 };
 
-static GLuint compile_shader(const char* path, int shaderType);
+static GLuint compile_shader(int shaderType, const char* path);
 static uint create_program(int count, ...);
