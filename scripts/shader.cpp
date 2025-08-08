@@ -1,10 +1,20 @@
 #include "shader.hpp"
+#include "glad/glad.h"
 #include "main.hpp"
 #include <GL/glext.h>
 #include <cstdarg>
+#include <filesystem>
+#include <fstream>
 
 Shader::Shader(uint shaderCount, ...)
 {
+    if (!initialized)
+    {
+        Shader::add_all_shader_include_strings();
+
+        initialized = true;
+    }
+
     std::va_list args;
 
     GLuint shaderIds[shaderCount];
@@ -12,7 +22,7 @@ Shader::Shader(uint shaderCount, ...)
     for (int i = 0; i < shaderCount; i++) {
         int shaderType = va_arg(args, int);
         const char* shaderPath = va_arg(args, const char*);
-        shaderIds[i] = compile_shader(shaderType, shaderPath);
+        shaderIds[i] = compile_shader_from_path(shaderType, shaderPath);
     }
     va_end(args);
 
@@ -67,7 +77,7 @@ PipelineShader::PipelineShader(const char* vertexPath, const char* fragmentPath)
         GL_FRAGMENT_SHADER, fragmentPath
     ) {}
 
-GLuint compile_shader(int shaderType, const char* path)
+GLuint Shader::compile_shader_from_path(int shaderType, const char* path)
 {
     std::string code;
     std::ifstream shaderFile;
@@ -91,21 +101,36 @@ GLuint compile_shader(int shaderType, const char* path)
     }
     const char* shaderCode = code.c_str();
 
-    // 2. compile shaders
-    uint shaderID;
-    int success;
-    char infoLog[512];
-    
-    // vertex Shader
-    shaderID = glCreateShader(shaderType);
+    // compile shader
+    uint shaderID = glCreateShader(shaderType);
     glShaderSource(shaderID, 1, &shaderCode, NULL);
+
+    // const char* search_directories[] = { "/shaders/include" };
+    // glCompileShaderIncludeARB(shaderID, glm::countof(search_directories), search_directories, nullptr);
+
     glCompileShader(shaderID);
+    
     // print compile errors if any
+    int success;
     glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
+
     if (!success)
     {
-        glGetShaderInfoLog(shaderID, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+        int infoLogLength;
+        glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
+
+        std::string infoLogStr;
+        if (infoLogLength)
+        {
+            char infoLog[infoLogLength];
+            glGetShaderInfoLog(shaderID, infoLogLength, NULL, infoLog);
+            infoLogStr = infoLog;
+        }
+        else
+        {
+            infoLogStr = "Info log was empty. Are you sure the shader was compiled?";
+        }
+        std::cout << "ERROR::SHADER::" << Shader::get_shader_type_string(shaderType) << "::COMPILATION_FAILED\n" << infoLogStr << std::endl;
         exit(1);
     }
 
@@ -114,16 +139,16 @@ GLuint compile_shader(int shaderType, const char* path)
 
 void Shader::update_uniforms()
 {
-    // variables of uniforms
-    GLint count;
-
     GLint size; // size of the variable
     GLenum type; // type of the variable (float, vec3 or mat4, etc)
 
-    const GLsizei bufSize = 255;
+    GLsizei bufSize;
+    glGetProgramiv(programID, GL_ACTIVE_UNIFORM_MAX_LENGTH, &bufSize);
     GLchar name[bufSize]; // variable name in GLSL
     GLsizei length; // name length
 
+    // variables of uniforms
+    GLint count;
     glGetProgramiv(programID, GL_ACTIVE_UNIFORMS, &count);
 
     uniformLocations = {};
@@ -135,10 +160,40 @@ void Shader::update_uniforms()
     }
 }
 
+const std::string& Shader::get_shader_type_string(int shaderType)
+{
+    return SHADER_TYPE_STRINGS.at(shaderType);
+}
+
+void Shader::add_all_shader_include_strings()
+{
+    for (const fs::directory_entry& dir_entry : fs::recursive_directory_iterator(shaderIncludePath))
+    {
+        const fs::path& path = dir_entry.path();
+
+        std::fstream file{path};
+        std::string line;
+        std::stringstream sourceStream{};
+        while (std::getline(file, line))
+        {
+            sourceStream << line << "\n";
+        }
+        const std::string& source = sourceStream.str();
+
+        // TODO: fix this. it completely ignores the file system 💔
+        std::string stringPath = "/" + path.filename().string();
+        // std::cout << "stringPath : \"" << stringPath << "\"\n";
+        // offset so that it starts with '/'
+        glNamedStringARB(GL_SHADER_INCLUDE_ARB, -1, stringPath.c_str(), -1, source.c_str());
+    }
+}
+
+
 void Shader::use() 
 { 
     glUseProgram(programID);
 }
+
 
 GLint Shader::get_uniform_location(const std::string &name) const
 {
@@ -190,4 +245,11 @@ void Shader::set_mat4(const std::string &name, glm::mat4 value) const
 {
     GLint location = this->get_uniform_location(name);
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
+}
+
+PhysicsObject::PhysicsObject(glm::vec2 position, glm::vec2 velocity, float radius)
+{
+    this->position = position;
+    this->velocity = velocity;
+    this->radius = radius;
 }

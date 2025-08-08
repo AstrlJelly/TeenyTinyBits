@@ -1,7 +1,7 @@
 #version 460 core
 #extension GL_ARB_shading_language_include : require
 
-#include "physics_object.glsl"
+#include "/physics_object.glsl"
 
 highp float random(vec2 co)
 {

@@ -1,7 +1,7 @@
 #version 460 core
 #extension GL_ARB_shading_language_include : require
 
-#include "physics_object.glsl"
+#include "/physics_object.glsl"
 
 highp float random(vec2 co)
 {
@@ -19,10 +19,10 @@ void main()
     Object currentObject = allObjects[gl_WorkGroupID.x];
     // if it didn't exist
     if (currentObject.radius == 0) {
-        allObjects[gl_WorkGroupID.x] = Object(vec2(0, 0), vec2(0, 0), 0.5);
+        allObjects[gl_WorkGroupID.x] = Object(vec2(0, 0), vec2(0, 0), 1);
     }
 
-    currentObject.velocity.y -= 0.01;
+    currentObject.velocity.y -= 0.001;
     
     allObjects[gl_WorkGroupID.x] = currentObject;
 }

@@ -3,7 +3,7 @@
 
 KeyStateInfo::KeyStateInfo(KeyState state, int mods)
 {
-    this->state = state;
+    this->keyState = state;
     this->modState = mods;
     this->update_timestamp();
 }
@@ -28,24 +28,31 @@ double KeyStateInfo::get_timestamp()
 }
 
 
-bool KeyStateInfo::is_in_state(KeyState stateCheck)
+bool KeyStateInfo::is_in_state(KeyState stateCheck, int mods)
 {
-    return (this->state & stateCheck) == stateCheck;
+    return is_in_key_state(stateCheck) && is_in_mod_state(mods);
+}
+bool KeyStateInfo::is_in_key_state(KeyState stateCheck)
+{
+    return (this->keyState & stateCheck) == stateCheck;
 }
 bool KeyStateInfo::is_in_mod_state(int mods)
 {
     return (this->modState & mods) == mods;
 }
-KeyState KeyStateInfo::get_state()
+
+KeyState KeyStateInfo::get_key_state()
 {
-    return this->state;
+    return this->keyState;
 }
 
 
-InputManager::InputManager()
+InputManager::InputManager(GLFWwindow* window)
 {
     allKeyStates = {};
     realTimeScrollDelta = {};
+
+    initialize_callbacks(window);
 }
 
 InputManager* InputManager::get_input_manager(GLFWwindow* window)
@@ -66,44 +73,44 @@ void InputManager::initialize_callbacks(GLFWwindow *window)
 bool InputManager::is_key_pressed_this_frame(int key, int mods)
 {
     KeyStateInfo keyState = allKeyStates[key];
-    return keyState.is_in_state(KEY_PRESSED) && keyState.get_timestamp() > lastFrameStartTime;
+    return keyState.is_in_state(KEY_PRESSED, mods) && keyState.get_timestamp() > lastFrameStartTime;
 }
 bool InputManager::is_key_pressed(int key, int mods)
 {
     KeyStateInfo keyState = allKeyStates[key];
-    return keyState.is_in_state(KEY_PRESSED);
+    return keyState.is_in_state(KEY_PRESSED, mods);
 }
 bool InputManager::is_key_released_this_frame(int key, int mods)
 {
     KeyStateInfo keyState = allKeyStates[key];
-    return keyState.is_in_state(KEY_RELEASED) && keyState.get_timestamp() > lastFrameStartTime;
+    return keyState.is_in_state(KEY_RELEASED, mods) && keyState.get_timestamp() > lastFrameStartTime;
 }
 bool InputManager::is_key_released(int key, int mods)
 {
     KeyStateInfo keyState = allKeyStates[key];
-    return keyState.is_in_state(KEY_RELEASED);
+    return keyState.is_in_state(KEY_RELEASED, mods);
 }
 
 
 bool InputManager::is_mouse_button_pressed_this_frame(int button, int mods)
 {
     KeyStateInfo keyState = allMouseButtonStates[button];
-    return keyState.is_in_state(KEY_PRESSED) && keyState.get_timestamp() > lastFrameStartTime;
+    return keyState.is_in_state(KEY_PRESSED, mods) && keyState.get_timestamp() > lastFrameStartTime;
 }
 bool InputManager::is_mouse_button_pressed(int button, int mods)
 {
     KeyStateInfo keyState = allMouseButtonStates[button];
-    return keyState.is_in_state(KEY_PRESSED);
+    return keyState.is_in_state(KEY_PRESSED, mods);
 }
 bool InputManager::is_mouse_button_released_this_frame(int button, int mods)
 {
     KeyStateInfo keyState = allMouseButtonStates[button];
-    return keyState.is_in_state(KEY_RELEASED) && keyState.get_timestamp() > lastFrameStartTime;
+    return keyState.is_in_state(KEY_RELEASED, mods) && keyState.get_timestamp() > lastFrameStartTime;
 }
 bool InputManager::is_mouse_button_released(int button, int mods)
 {
     KeyStateInfo keyState = allMouseButtonStates[button];
-    return keyState.is_in_state(KEY_RELEASED);
+    return keyState.is_in_state(KEY_RELEASED, mods);
 }
 
 

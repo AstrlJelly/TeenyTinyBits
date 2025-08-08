@@ -11,25 +11,41 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <filesystem>
 
+
+namespace fs = std::filesystem;
 
 
 class Shader
 {
 private:
+    static const inline std::map<int, std::string> SHADER_TYPE_STRINGS = {
+        { GL_COMPUTE_SHADER, "COMPUTE" },
+        { GL_GEOMETRY_SHADER, "GEOMETRY" },
+        { GL_FRAGMENT_SHADER, "FRAGMENT" },
+        { GL_VERTEX_SHADER, "VERTEX" },
+    };
+
     // the program ID
     GLuint programID;
 
-    void update_uniforms();
-    
-public:
-
     // variable name, location
     std::map<std::string, GLint> uniformLocations;
+
+    void update_uniforms();
+
+    static inline bool initialized = false;
+
+    static GLuint compile_shader_from_path(int shaderType, const char* path);
+    static void add_all_shader_include_strings();
+    
+public:
+    static const inline fs::path shaderIncludePath = "shaders/include";
   
-    // might be useful if shaders will be created outside of
-    // this class
+    // might be useful if shaders will be created outside of this class
     // Shader(GLuint program);
+
     // constructor reads and builds the shader
     Shader(uint argc, ...);
 
@@ -45,7 +61,10 @@ public:
     void set_vec3 (const std::string& name, double x, double y, double z) const;
     void set_mat4 (const std::string& name, glm::mat4 value)              const;
 
+    // duh
     static bool is_shader(GLuint programID);
+
+    static const std::string& get_shader_type_string(int shaderType);
 };
 
 class PipelineShader : public Shader
@@ -69,9 +88,9 @@ struct PhysicsObject
     glm::vec2 position;
     glm::vec2 velocity;
     float radius;
-    // // this will make the struct be the same size as the struct in glsl.
-    // // don't use this for anything...
-    // glm::vec3 __buffer;
+    // this will make the struct be the same size as the struct in glsl.
+    // don't use this for anything...
+    float __buffer;
 };
 
 static GLuint compile_shader(int shaderType, const char* path);

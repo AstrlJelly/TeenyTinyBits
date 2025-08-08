@@ -31,8 +31,13 @@ private:
     double deltaTime;
     double lastFrameTime;
 
-    bool glfwInitialized : 1;
-    bool gladInitialized : 1;
+    static inline bool glfwInitialized = false;
+    static inline bool gladInitialized = false;
+
+    static void init_glfw();
+    static void init_glad();
+
+    static void on_framebuffer_size_glfw(GLFWwindow* window, int width, int height);
     
 public:
     GameWindow(glm::vec2 size, const char* title);
@@ -59,6 +64,7 @@ public:
 
     glm::vec2 get_relative_cursor_delta();
 };
+
 
 void init_glfw();
 void init_glad();

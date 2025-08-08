@@ -12,5 +12,3 @@
 #include "game_window.hpp"
 
 int main(void);
-
-static void on_framebuffer_size_glfw(GLFWwindow* window, int width, int height);

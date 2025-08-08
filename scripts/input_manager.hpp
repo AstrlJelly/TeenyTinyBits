@@ -5,9 +5,9 @@
 
 #include "GLFW/glfw3.h"
 
+#include "glm/glm/ext/vector_float2.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/glm/gtx/string_cast.hpp"
-#include "glm/glm/ext/vector_float2.hpp"
 
 typedef uint32_t KeyState;
 constexpr KeyState KEY_RELEASED = 1 << 0;
@@ -15,7 +15,7 @@ constexpr KeyState KEY_PRESSED  = 1 << 1;
 
 class KeyStateInfo
 {
-    KeyState state;
+    KeyState keyState;
     int modState;
     double timestamp;
 
@@ -26,8 +26,10 @@ public:
     void set_timestamp(double time);
     double get_timestamp();
 
-    bool is_in_state(KeyState state);
-    KeyState get_state();
+    bool is_in_state(KeyState keyState, int modState);
+
+    bool is_in_key_state(KeyState stateCheck);
+    KeyState get_key_state();
     bool is_in_mod_state(int modState);
     KeyState get_mod_state();
 };
@@ -56,7 +58,7 @@ class InputManager
     static void on_scroll_glfw_callback      (GLFWwindow *window, double xoffset, double yoffset);
 
 public:
-    InputManager();
+    InputManager(GLFWwindow* window);
     static InputManager* get_input_manager(GLFWwindow* window);
 
     KeyStateInfo operator[](int key);

@@ -1,5 +1,6 @@
 #include "game_window.hpp"
 #include "GLFW/glfw3.h"
+#include "input_manager.hpp"
 #include "shader.hpp"
 
 GameWindow::GameWindow(glm::vec2 size, const char* title)
@@ -7,11 +8,10 @@ GameWindow::GameWindow(glm::vec2 size, const char* title)
 	if (!glfwInitialized)
 	{
 		init_glfw();
-		glfwInitialized = true;
 	}
 
 	this->window = glfwCreateWindow(size.x, size.y, title, NULL, NULL);
-	if (window == NULL)
+	if (window == nullptr)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
@@ -21,36 +21,54 @@ GameWindow::GameWindow(glm::vec2 size, const char* title)
 	glfwSetWindowUserPointer(window, this);
 	glfwSwapInterval(1);
 
+	glfwSetFramebufferSizeCallback(window, on_framebuffer_size_glfw);
+
 	if (!gladInitialized)
 	{
 		init_glad();
-		gladInitialized = true;
 	}
 
-    this->inputManager = new InputManager();
+    this->inputManager = new InputManager(window);
 }
 
-void init_glfw()
+void GameWindow::init_glfw()
 {
-	glfwInit();
+	int result = glfwInit();
+	if (!result)
+	{
+		std::cerr << "Failed to initialized GLFW" << std::endl;
+		exit(1);
+	}
 			
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	GameWindow::glfwInitialized = true;
 }
 
-void init_glad()
+void GameWindow::init_glad()
 {
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	int result = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+	if (!result)
 	{
 		std::cerr << "Failed to initialize GLAD" << std::endl;
 		exit(1);
 	}
+
+	glEnable(GL_DEPTH_TEST);
+
+	GameWindow::gladInitialized = true;
 }
 
 GameWindow::~GameWindow()
 {
     delete inputManager;
+}
+
+void GameWindow::on_framebuffer_size_glfw(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
 }
 
 void GameWindow::start_game_loop()
@@ -95,9 +113,9 @@ void GameWindow::start_game_loop()
 	glNamedBufferStorage(objectsBuffer, sizeof(PhysicsObject) * TEMP_MAX_OBJECTS, nullptr, GL_DYNAMIC_STORAGE_BIT);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, objectsBuffer);
 	
-	PipelineShader shader = PipelineShader("./shaders/shader.vert", "./shaders/shader.frag");
-	ComputeShader velocityCompute = ComputeShader("./shaders/velocity.comp");
-	ComputeShader positionCompute = ComputeShader("./shaders/position.comp");
+	PipelineShader shader = PipelineShader("shaders/shader.vert", "shaders/shader.frag");
+	ComputeShader velocityCompute = ComputeShader("shaders/velocity.comp");
+	ComputeShader positionCompute = ComputeShader("shaders/position.comp");
 
 	stbi_set_flip_vertically_on_load(true);
 
@@ -112,7 +130,7 @@ void GameWindow::start_game_loop()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	// load and generate the texture
 	int width, height, nrChannels;
-	unsigned char *diffuseMapData = stbi_load("./assets/container2.png", &width, &height, &nrChannels, 0);
+	unsigned char *diffuseMapData = stbi_load("assets/container2.png", &width, &height, &nrChannels, 0);
 	if (diffuseMapData)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, diffuseMapData);
@@ -187,14 +205,15 @@ void GameWindow::start_game_loop()
 			std::cout << "cameraPos = " << glm::to_string(cameraPos) << "\n";
 			std::cout << "windowScale = " << glm::to_string(windowScale) << "\n";
         } 
-		// else if (inputManager->is_key_pressed_this_frame(GLFW_KEY_TAB))
+		else if (inputManager->is_key_pressed_this_frame(GLFW_KEY_TAB))
 		{
 			PhysicsObject* data = new PhysicsObject[TEMP_MAX_OBJECTS]();
-			glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(PhysicsObject) * objectCount, data);
+			glGetNamedBufferSubData(objectsBuffer, 0, sizeof(PhysicsObject) * objectCount, data);
 			for (int i = 0; i < objectCount; i++) {
 				PhysicsObject object = data[i];
-				std::cout << i << " : object.velocity : " << glm::to_string(object.velocity) << "\n";
+				std::cout << i << " : object.position : " << glm::to_string(object.position) << "\n";
 			}
+			std::cout << std::endl;
 		}
         if (inputManager->is_key_pressed_this_frame(GLFW_KEY_T))
         {
@@ -218,15 +237,11 @@ void GameWindow::start_game_loop()
 			int newMode = (get_cursor_mode() == GLFW_CURSOR_DISABLED) ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED;
 			this->set_cursor_mode(newMode);
         }
-		if (inputManager->is_key_pressed_this_frame(GLFW_KEY_E)) {
-			std::cout << "spawn object " << objectCount << "\n";
-			objectCount += 1000;
-		}
-		if (inputManager->is_key_pressed(GLFW_KEY_R)) {
+		if (inputManager->is_key_pressed_this_frame(GLFW_KEY_E) || inputManager->is_key_pressed(GLFW_KEY_R)) {
 			std::cout << "spawn object " << objectCount << "\n";
 			objectCount++;
-			objectsToAdd.push_back(PhysicsObject());
-			glBufferSubData(GL_SHADER_STORAGE_BUFFER, objectCount, sizeof(PhysicsObject) * objectsToAdd.size(), objectsToAdd.data());
+			objectsToAdd.push_back(PhysicsObject(glm::vec2(0), glm::vec2(0), 1));
+			glNamedBufferSubData(objectsBuffer, sizeof(PhysicsObject) * objectCount, sizeof(PhysicsObject) * objectsToAdd.size(), objectsToAdd.data());
 		}
 
 		// creates an effect where zooming gets stronger the more you zoom in or out
@@ -299,6 +314,11 @@ GameWindow* GameWindow::get_game_window(GLFWwindow* window)
 GLFWwindow* GameWindow::get_window()
 {
     return window;
+}
+
+InputManager* GameWindow::get_input_manager()
+{
+	return inputManager;
 }
 
 double GameWindow::get_delta_time()
