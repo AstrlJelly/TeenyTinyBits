@@ -1,5 +1,3 @@
-#version 460 core
-
 struct Object {
     vec2 position;
     vec2 velocity;

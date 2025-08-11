@@ -105,8 +105,11 @@ GLuint Shader::compile_shader_from_path(int shaderType, const char* path)
     uint shaderID = glCreateShader(shaderType);
     glShaderSource(shaderID, 1, &shaderCode, NULL);
 
-    // const char* search_directories[] = { "/shaders/include" };
-    // glCompileShaderIncludeARB(shaderID, glm::countof(search_directories), search_directories, nullptr);
+    fs::path absoluteIncludePath = fs::absolute(shaderIncludePath);
+    const char* includePathStr = absoluteIncludePath.c_str();
+    std::cout << "includePathStr : " << includePathStr << std::endl;
+    const char* search_directories[] = { includePathStr };
+    glCompileShaderIncludeARB(shaderID, glm::countof(search_directories), search_directories, nullptr);
 
     glCompileShader(shaderID);
     

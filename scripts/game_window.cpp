@@ -119,28 +119,28 @@ void GameWindow::start_game_loop()
 
 	stbi_set_flip_vertically_on_load(true);
 
-	/// texture stuff
-	uint diffuseMap;
-	glGenTextures(1, &diffuseMap);
-	glBindTexture(GL_TEXTURE_2D, diffuseMap);
-	// set the texture wrapping/filtering options (on the currently bound texture object)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// load and generate the texture
-	int width, height, nrChannels;
-	unsigned char *diffuseMapData = stbi_load("assets/container2.png", &width, &height, &nrChannels, 0);
-	if (diffuseMapData)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, diffuseMapData);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(diffuseMapData);
+	// /// texture stuff
+	// uint diffuseMap;
+	// glGenTextures(1, &diffuseMap);
+	// glBindTexture(GL_TEXTURE_2D, diffuseMap);
+	// // set the texture wrapping/filtering options (on the currently bound texture object)
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// // load and generate the texture
+	// int width, height, nrChannels;
+	// unsigned char *diffuseMapData = stbi_load("assets/container2.png", &width, &height, &nrChannels, 0);
+	// if (diffuseMapData)
+	// {
+	// 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, diffuseMapData);
+	// 	glGenerateMipmap(GL_TEXTURE_2D);
+	// }
+	// else
+	// {
+	// 	std::cout << "Failed to load texture" << std::endl;
+	// }
+	// stbi_image_free(diffuseMapData);
 
 	glm::vec3 cameraPos(0.0, 0.0, 0.0);
 	float zoomLevel = 1;
@@ -238,9 +238,9 @@ void GameWindow::start_game_loop()
 			this->set_cursor_mode(newMode);
         }
 		if (inputManager->is_key_pressed_this_frame(GLFW_KEY_E) || inputManager->is_key_pressed(GLFW_KEY_R)) {
-			std::cout << "spawn object " << objectCount << "\n";
 			objectCount++;
 			objectsToAdd.push_back(PhysicsObject(glm::vec2(0), glm::vec2(0), 1));
+			std::cout << "object count : " << objectCount << "\n";
 			glNamedBufferSubData(objectsBuffer, sizeof(PhysicsObject) * objectCount, sizeof(PhysicsObject) * objectsToAdd.size(), objectsToAdd.data());
 		}
 
