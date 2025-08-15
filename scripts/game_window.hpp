@@ -7,16 +7,8 @@
 // #include <ImGui/imgui.h>
 // #include <ImGui/backends/imgui_impl_glfw.h>
 // #include <ImGui/backends/imgui_impl_opengl3.h>
-#include <stb/stb_image.h>
-#include <glm/glm/glm.hpp>
-#include "glm/glm/fwd.hpp"
+#include <glm/glm/fwd.hpp>
 
-#include <algorithm>
-// #include <cmath>
-#include <iostream>
-#include <ostream>
-
-#include "shader.hpp"
 #include "input_manager.hpp"
 
 #define TEMP_MAX_OBJECTS 0xFFFF
@@ -37,7 +29,7 @@ private:
     static void init_glfw();
     static void init_glad();
 
-    static void on_framebuffer_size_glfw(GLFWwindow* window, int width, int height);
+    static void on_framebuffer_size_glfw(GLFWwindow* window, int32_t width, int32_t height);
     
 public:
     GameWindow(glm::vec2 size, const char* title);
@@ -48,14 +40,14 @@ public:
     void start_game_loop();
     void initialize_frame();
 
-    GLFWwindow* get_window();
+    GLFWwindow*   get_window();
     InputManager* get_input_manager();
 
     glm::vec2 get_window_size();
     glm::vec2 get_window_pos();
 
-    int get_cursor_mode();
-    void set_cursor_mode(int mode);
+    int32_t get_cursor_mode();
+    void    set_cursor_mode(int32_t mode);
 
     double get_delta_time();
     

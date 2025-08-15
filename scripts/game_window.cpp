@@ -2,6 +2,8 @@
 #include "GLFW/glfw3.h"
 #include "input_manager.hpp"
 #include "shader.hpp"
+#include <iostream>
+#include <stb/stb_image.h>
 
 GameWindow::GameWindow(glm::vec2 size, const char* title)
 {
@@ -33,7 +35,7 @@ GameWindow::GameWindow(glm::vec2 size, const char* title)
 
 void GameWindow::init_glfw()
 {
-	int result = glfwInit();
+	int32_t result = glfwInit();
 	if (!result)
 	{
 		std::cerr << "Failed to initialized GLFW" << std::endl;
@@ -49,7 +51,7 @@ void GameWindow::init_glfw()
 
 void GameWindow::init_glad()
 {
-	int result = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+	int32_t result = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 	if (!result)
 	{
 		std::cerr << "Failed to initialize GLAD" << std::endl;
@@ -66,7 +68,7 @@ GameWindow::~GameWindow()
     delete inputManager;
 }
 
-void GameWindow::on_framebuffer_size_glfw(GLFWwindow* window, int width, int height)
+void GameWindow::on_framebuffer_size_glfw(GLFWwindow* window, int32_t width, int32_t height)
 {
     glViewport(0, 0, width, height);
 }
@@ -129,7 +131,7 @@ void GameWindow::start_game_loop()
 	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	// // load and generate the texture
-	// int width, height, nrChannels;
+	// int32_t width, height, nrChannels;
 	// unsigned char *diffuseMapData = stbi_load("assets/container2.png", &width, &height, &nrChannels, 0);
 	// if (diffuseMapData)
 	// {
@@ -146,7 +148,7 @@ void GameWindow::start_game_loop()
 	float zoomLevel = 1;
 	const float minZoomLevel = 0.001, maxZoomLevel = 100;
 
-	int objectCount = 4;
+	int32_t objectCount = 4;
 	std::vector<PhysicsObject> objectsToAdd{};
 
 	while (!glfwWindowShouldClose(window))
@@ -209,7 +211,7 @@ void GameWindow::start_game_loop()
 		{
 			PhysicsObject* data = new PhysicsObject[TEMP_MAX_OBJECTS]();
 			glGetNamedBufferSubData(objectsBuffer, 0, sizeof(PhysicsObject) * objectCount, data);
-			for (int i = 0; i < objectCount; i++) {
+			for (int32_t i = 0; i < objectCount; i++) {
 				PhysicsObject object = data[i];
 				std::cout << i << " : object.position : " << glm::to_string(object.position) << "\n";
 			}
@@ -234,7 +236,7 @@ void GameWindow::start_game_loop()
             glfwSetWindowShouldClose(window, true);
         }
         if (inputManager->is_key_pressed_this_frame(GLFW_KEY_F)) {
-			int newMode = (get_cursor_mode() == GLFW_CURSOR_DISABLED) ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED;
+			int32_t newMode = (get_cursor_mode() == GLFW_CURSOR_DISABLED) ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED;
 			this->set_cursor_mode(newMode);
         }
 		if (inputManager->is_key_pressed_this_frame(GLFW_KEY_E) || inputManager->is_key_pressed(GLFW_KEY_R)) {
@@ -328,24 +330,24 @@ double GameWindow::get_delta_time()
 
 glm::vec2 GameWindow::get_window_size()
 {
-	glm::vec<2, int> windowSize{};
+	glm::vec<2, int32_t> windowSize{};
 	glfwGetWindowSize(window, &windowSize.x, &windowSize.y);
 	return static_cast<glm::vec2>(windowSize);
 }
 
 glm::vec2 GameWindow::get_window_pos()
 {
-	glm::vec<2, int> windowPos{};
+	glm::vec<2, int32_t> windowPos{};
 	glfwGetWindowPos(window, &windowPos.x, &windowPos.y);
 	return static_cast<glm::vec2>(windowPos);
 }
 
-int GameWindow::get_cursor_mode()
+int32_t GameWindow::get_cursor_mode()
 {
 	return glfwGetInputMode(window, GLFW_CURSOR);
 }
 
-void GameWindow::set_cursor_mode(int mode)
+void GameWindow::set_cursor_mode(int32_t mode)
 {
     glfwSetInputMode(window, GLFW_CURSOR, mode);
 	
@@ -369,7 +371,7 @@ glm::vec2 GameWindow::get_cursor_delta_if_focused()
 
 glm::vec2 GameWindow::get_relative_cursor_delta()
 {
-	glm::vec<2, int> windowSize{};
+	glm::vec<2, int32_t> windowSize{};
 	glfwGetWindowSize(window, &windowSize.x, &windowSize.y);
 	glm::vec2 windowSizeF = windowSize;
 	return (inputManager->get_cursor_delta() * glm::vec2(2)) / windowSizeF;

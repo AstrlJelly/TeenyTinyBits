@@ -28,7 +28,11 @@ add_executable(${PROJECT_NAME}
     "${PROJECT_SCRIPTS_DIR}/main.cpp"
     "${PROJECT_SCRIPTS_DIR}/shader.cpp"
     "${PROJECT_SCRIPTS_DIR}/game_window.cpp"
-    "${PROJECT_SCRIPTS_DIR}/input_manager.cpp")
+    "${PROJECT_SCRIPTS_DIR}/input_manager.cpp"
+    "${PROJECT_SCRIPTS_DIR}/component_system.cpp"
+    # project components
+    "${PROJECT_SCRIPTS_DIR}/components/transform.cpp"
+)
 
 add_subdirectory("${PROJECT_INCLUDE_DIR}/glm")
 add_subdirectory("${PROJECT_INCLUDE_DIR}/GLFW")

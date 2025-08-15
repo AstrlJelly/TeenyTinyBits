@@ -5,7 +5,7 @@
 
 #include "GLFW/glfw3.h"
 
-#include "glm/glm/ext/vector_float2.hpp"
+#include "glm/glm/vec2.hpp" // IWYU pragma: keep
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/glm/gtx/string_cast.hpp"
 
@@ -16,29 +16,29 @@ constexpr KeyState KEY_PRESSED  = 1 << 1;
 class KeyStateInfo
 {
     KeyState keyState;
-    int modState;
+    int32_t modState;
     double timestamp;
 
 public:
-    KeyStateInfo(KeyState state = KEY_RELEASED, int mods = 0);
+    KeyStateInfo(KeyState state = KEY_RELEASED, int32_t mods = 0);
 
-    void update_timestamp();
-    void set_timestamp(double time);
+    void   update_timestamp();
+    void   set_timestamp(double time);
     double get_timestamp();
 
-    bool is_in_state(KeyState keyState, int modState);
+    bool is_in_state(KeyState keyState, int32_t modState);
 
     bool is_in_key_state(KeyState stateCheck);
+    bool is_in_mod_state(int32_t modState);
     KeyState get_key_state();
-    bool is_in_mod_state(int modState);
     KeyState get_mod_state();
 };
 
 class InputManager
 {
     // key state (GLFW_KEY_A), keystate (duh)
-    std::map<int, KeyStateInfo> allKeyStates;
-    std::map<int, KeyStateInfo> allMouseButtonStates;
+    std::map<int32_t, KeyStateInfo> allKeyStates;
+    std::map<int32_t, KeyStateInfo> allMouseButtonStates;
 
     double frameStartTime;
     double lastFrameStartTime;
@@ -52,8 +52,8 @@ class InputManager
     // shouldn't really be used, it's highly likely that this changes throughout the frame
     glm::vec2 realTimeScrollDelta;
 
-    static void on_key_glfw_callback         (GLFWwindow *window, int key, int scancode, int action, int mods);
-    static void on_mouse_button_glfw_callback(GLFWwindow *window, int button, int action, int mods);
+    static void on_key_glfw_callback         (GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods);
+    static void on_mouse_button_glfw_callback(GLFWwindow *window, int32_t button, int32_t action, int32_t mods);
     static void on_cursor_move_glfw_callback (GLFWwindow *window, double x, double y);
     static void on_scroll_glfw_callback      (GLFWwindow *window, double xoffset, double yoffset);
 
@@ -61,19 +61,19 @@ public:
     InputManager(GLFWwindow* window);
     static InputManager* get_input_manager(GLFWwindow* window);
 
-    KeyStateInfo operator[](int key);
+    KeyStateInfo operator[](int32_t key);
 
     // key can be a an integer, like GLFW_KEY_A or GLFW_KEY_TAB
     // mods can be a bitfield containing GLFW_MOD_SHIFT, GLFW_MOD_CTRL, etc
-    bool is_key_pressed_this_frame (int key, int mods = 0);
-    bool is_key_pressed            (int key, int mods = 0);
-    bool is_key_released_this_frame(int key, int mods = 0);
-    bool is_key_released           (int key, int mods = 0);
+    bool is_key_pressed_this_frame (int32_t key, int32_t mods = 0);
+    bool is_key_pressed            (int32_t key, int32_t mods = 0);
+    bool is_key_released_this_frame(int32_t key, int32_t mods = 0);
+    bool is_key_released           (int32_t key, int32_t mods = 0);
 
-    bool is_mouse_button_pressed_this_frame (int button, int mods = 0);
-    bool is_mouse_button_pressed            (int button, int mods = 0);
-    bool is_mouse_button_released_this_frame(int button, int mods = 0);
-    bool is_mouse_button_released           (int button, int mods = 0);
+    bool is_mouse_button_pressed_this_frame (int32_t button, int32_t mods = 0);
+    bool is_mouse_button_pressed            (int32_t button, int32_t mods = 0);
+    bool is_mouse_button_released_this_frame(int32_t button, int32_t mods = 0);
+    bool is_mouse_button_released           (int32_t button, int32_t mods = 0);
 
     glm::vec2 get_cursor_delta();
     // implies that raw cursor data will be retrieved if supported
@@ -84,8 +84,8 @@ public:
 
     static void initialize_callbacks(GLFWwindow* window);
 
-    void on_key_glfw         (GLFWwindow *window, int key, int scancode, int action, int mods);
-    void on_mouse_button_glfw(GLFWwindow *window, int button, int action, int mods);
+    void on_key_glfw         (GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods);
+    void on_mouse_button_glfw(GLFWwindow *window, int32_t button, int32_t action, int32_t mods);
     void on_cursor_move_glfw (GLFWwindow *window, double x, double y);
     void on_scroll_glfw      (GLFWwindow *window, double xoffset, double yoffset);
 };

@@ -1,16 +1,12 @@
 #pragma once
 
-#include <glad/glad.h> // include glad to get all the required OpenGL headers
+#include <glad/glad.h>
 
-#include <glm/glm/glm.hpp>
 #include <glm/glm/fwd.hpp>
-#include "glm/glm/gtc/type_ptr.hpp"
+#include "glm/glm/gtc/type_ptr.hpp" // IWYU pragma: keep, common header
 
 #include <map>
 #include <string>
-#include <fstream>
-#include <sstream>
-#include <iostream>
 #include <filesystem>
 
 
@@ -20,11 +16,11 @@ namespace fs = std::filesystem;
 class Shader
 {
 private:
-    static const inline std::map<int, std::string> SHADER_TYPE_STRINGS = {
-        { GL_COMPUTE_SHADER, "COMPUTE" },
+    static const inline std::map<int32_t, std::string> SHADER_TYPE_STRINGS = {
+        { GL_COMPUTE_SHADER,  "COMPUTE" },
         { GL_GEOMETRY_SHADER, "GEOMETRY" },
         { GL_FRAGMENT_SHADER, "FRAGMENT" },
-        { GL_VERTEX_SHADER, "VERTEX" },
+        { GL_VERTEX_SHADER,   "VERTEX" },
     };
 
     // the program ID
@@ -37,7 +33,7 @@ private:
 
     static inline bool initialized = false;
 
-    static GLuint compile_shader_from_path(int shaderType, const char* path);
+    static GLuint compile_shader_from_path(int32_t shaderType, const char* path);
     static void add_all_shader_include_strings();
     
 public:
@@ -55,7 +51,7 @@ public:
     // utility uniform functions
     GLint get_uniform_location(const std::string& name) const;
     void set_bool (const std::string& name, bool value)                   const;
-    void set_int  (const std::string& name, int value)                    const;
+    void set_int  (const std::string& name, int32_t value)                    const;
     void set_float(const std::string& name, float value)                  const;
     void set_vec3 (const std::string& name, glm::vec3 value)              const;
     void set_vec3 (const std::string& name, double x, double y, double z) const;
@@ -64,7 +60,7 @@ public:
     // duh
     static bool is_shader(GLuint programID);
 
-    static const std::string& get_shader_type_string(int shaderType);
+    static const std::string& get_shader_type_string(int32_t shaderType);
 };
 
 class PipelineShader : public Shader
@@ -79,7 +75,7 @@ public:
     ComputeShader(const char* computePath);
 
     void dispatch_indirect();
-    void dispatch(int x = 1, int y = 1, int z = 1);
+    void dispatch(int32_t x = 1, int32_t y = 1, int32_t z = 1);
 };
 
 struct PhysicsObject
@@ -93,5 +89,5 @@ struct PhysicsObject
     float __buffer;
 };
 
-static GLuint compile_shader(int shaderType, const char* path);
-static uint create_program(int count, ...);
+static GLuint compile_shader(int32_t shaderType, const char* path);
+static uint create_program(int32_t count, ...);
