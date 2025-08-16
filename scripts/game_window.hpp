@@ -9,6 +9,7 @@
 // #include <ImGui/backends/imgui_impl_opengl3.h>
 #include <glm/glm/fwd.hpp>
 
+#include "scene.hpp"
 #include "input_manager.hpp"
 
 #define TEMP_MAX_OBJECTS 0xFFFF
@@ -18,13 +19,14 @@ class GameWindow
 {
 private:
     GLFWwindow* window;
+    Scene* scene;
     InputManager* inputManager;
 
     double deltaTime;
     double lastFrameTime;
 
-    static inline bool glfwInitialized = false;
-    static inline bool gladInitialized = false;
+    static inline bool s_glfwInitialized = false;
+    static inline bool s_gladInitialized = false;
 
     static void init_glfw();
     static void init_glad();
@@ -41,6 +43,7 @@ public:
     void initialize_frame();
 
     GLFWwindow*   get_window();
+    Scene*        get_scene();
     InputManager* get_input_manager();
 
     glm::vec2 get_window_size();
@@ -53,11 +56,5 @@ public:
     
     // implies that raw cursor data will be retrieved if supported
     glm::vec2 get_cursor_delta_if_focused();
-
     glm::vec2 get_relative_cursor_delta();
 };
-
-
-void init_glfw();
-void init_glad();
-    

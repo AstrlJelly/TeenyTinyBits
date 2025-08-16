@@ -3,13 +3,13 @@
 #include <fstream>
 #include <iostream>
 
-Shader::Shader(uint shaderCount, ...)
+Shader::Shader(uint32_t shaderCount, ...)
 {
-    if (!initialized)
+    if (!s_initialized)
     {
         Shader::add_all_shader_include_strings();
 
-        initialized = true;
+        s_initialized = true;
     }
 
     std::va_list args;
@@ -107,8 +107,6 @@ GLuint Shader::compile_shader_from_path(int32_t shaderType, const char* path)
     const char* searchDirectories[] = { includePathStr };
     glCompileShaderIncludeARB(shaderID, glm::countof(searchDirectories), searchDirectories, nullptr);
 
-    glCompileShader(shaderID);
-    
     // print compile errors if any
     int32_t success;
     glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
@@ -118,19 +116,19 @@ GLuint Shader::compile_shader_from_path(int32_t shaderType, const char* path)
         int32_t infoLogLength;
         glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
 
-        const char* infoLogStr;
+        std::string infoLogStr;
         if (infoLogLength)
         {
             char infoLog[infoLogLength];
             glGetShaderInfoLog(shaderID, infoLogLength, NULL, infoLog);
-            infoLogStr = infoLog;
+            infoLogStr = std::string(infoLog);
         }
         else
         {
-            infoLogStr = "Info log was empty. Are you sure the shader was compiled?";
+            infoLogStr = std::string("Info log was empty. Are you sure the shader was compiled?");
         }
 
-        std::cout << "ERROR::SHADER::" << Shader::get_shader_type_string(shaderType) << "::COMPILATION_FAILED\n" << infoLogStr << std::endl;
+        std::cerr << "ERROR::SHADER::" << Shader::get_shader_type_string(shaderType) << "::COMPILATION_FAILED : " << infoLogLength << " chars" << "\n" << infoLogStr << std::endl;
         exit(1);
     }
 

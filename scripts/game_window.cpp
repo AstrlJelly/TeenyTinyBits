@@ -1,5 +1,6 @@
 #include "game_window.hpp"
 #include "GLFW/glfw3.h"
+#include "scene.hpp"
 #include "input_manager.hpp"
 #include "shader.hpp"
 #include <iostream>
@@ -7,7 +8,7 @@
 
 GameWindow::GameWindow(glm::vec2 size, const char* title)
 {
-	if (!glfwInitialized)
+	if (!s_glfwInitialized)
 	{
 		init_glfw();
 	}
@@ -25,11 +26,12 @@ GameWindow::GameWindow(glm::vec2 size, const char* title)
 
 	glfwSetFramebufferSizeCallback(window, on_framebuffer_size_glfw);
 
-	if (!gladInitialized)
+	if (!s_gladInitialized)
 	{
 		init_glad();
 	}
 
+    this->scene = new Scene();
     this->inputManager = new InputManager(window);
 }
 
@@ -46,7 +48,7 @@ void GameWindow::init_glfw()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GameWindow::glfwInitialized = true;
+	GameWindow::s_glfwInitialized = true;
 }
 
 void GameWindow::init_glad()
@@ -60,7 +62,7 @@ void GameWindow::init_glad()
 
 	glEnable(GL_DEPTH_TEST);
 
-	GameWindow::gladInitialized = true;
+	GameWindow::s_gladInitialized = true;
 }
 
 GameWindow::~GameWindow()
@@ -95,7 +97,7 @@ void GameWindow::start_game_loop()
 	};
 
     // first, configure the cube's VAO (and VBO)
-    uint VBO, VAO;
+    GLuint VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
 
@@ -153,140 +155,145 @@ void GameWindow::start_game_loop()
 
 	while (!glfwWindowShouldClose(window))
 	{
-		/// initialization stuff
+		// hard code this for now
 		this->initialize_frame();
 		inputManager->initialize_frame(window, deltaTime);
-
-		// ImGui_ImplOpenGL3_NewFrame();
-		// ImGui_ImplGlfw_NewFrame();
-		// ImGui::NewFrame();
-
-		float deltaTimeF = deltaTime;
-
-		glm::vec2 cursorDelta = inputManager->get_cursor_delta();
-		glm::vec2 focusedCursorDelta = this->get_cursor_delta_if_focused();
-		glm::vec2 relativeCursorDelta = this->get_relative_cursor_delta();
-		glm::vec2 scrollDelta = inputManager->get_scroll_delta();
-
-		glm::vec2 windowSize = this->get_window_size();
-		// glm::vec2 windowPos = this->get_window_pos();
-
-		// float zoomLevelLog = log(zoomLevel);
-		
-		glm::mat4 view = glm::mat4(1.0f);
-		
-		glm::vec2 zoomScale = glm::vec2(zoomLevel);
-		view = glm::scale(view, glm::vec3(zoomScale, 1));
-
-		view = glm::translate(view, cameraPos);
-
-		glm::vec2 windowScale = glm::vec2(windowSize.y, windowSize.x);
-		if (windowSize.x < windowSize.y)
-		{
-			windowScale /= glm::vec2(windowSize.y);
-		}
-		else // if x is greater or equal to y
-		{
-			windowScale /= glm::vec2(windowSize.x);
-		}
-		view = glm::scale(view, glm::vec3(windowScale, 1));
-
-		glm::mat4 model = glm::mat4(1.0f);
-
-		/// end init stuff
-
-		/// input stuff
-
-        if (inputManager->is_mouse_button_pressed(GLFW_MOUSE_BUTTON_1)) {
-			glm::vec3 moveCam = glm::vec3(relativeCursorDelta.x, -relativeCursorDelta.y, 0.0);
-			moveCam /= zoomLevel;
-			cameraPos += moveCam;
-        }
-		if (inputManager->is_key_pressed_this_frame(GLFW_KEY_TAB, GLFW_MOD_SHIFT))
-		{
-			std::cout << "cameraPos = " << glm::to_string(cameraPos) << "\n";
-			std::cout << "windowScale = " << glm::to_string(windowScale) << "\n";
-        } 
-		else if (inputManager->is_key_pressed_this_frame(GLFW_KEY_TAB))
-		{
-			PhysicsObject* data = new PhysicsObject[TEMP_MAX_OBJECTS]();
-			glGetNamedBufferSubData(objectsBuffer, 0, sizeof(PhysicsObject) * objectCount, data);
-			for (int32_t i = 0; i < objectCount; i++) {
-				PhysicsObject object = data[i];
-				std::cout << i << " : object.position : " << glm::to_string(object.position) << "\n";
-			}
-			std::cout << std::endl;
-		}
-        if (inputManager->is_key_pressed_this_frame(GLFW_KEY_T))
-        {
-			GLint polygonMode;
-			glGetIntegerv(GL_POLYGON_MODE, &polygonMode);
-
-			if (polygonMode == GL_FILL)
-			{
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			}
-			else
-			{
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			}
-        }
-
         if (inputManager->is_key_pressed_this_frame(GLFW_KEY_ESCAPE)) {
             glfwSetWindowShouldClose(window, true);
         }
-        if (inputManager->is_key_pressed_this_frame(GLFW_KEY_F)) {
-			int32_t newMode = (get_cursor_mode() == GLFW_CURSOR_DISABLED) ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED;
-			this->set_cursor_mode(newMode);
-        }
-		if (inputManager->is_key_pressed_this_frame(GLFW_KEY_E) || inputManager->is_key_pressed(GLFW_KEY_R)) {
-			objectCount++;
-			objectsToAdd.push_back(PhysicsObject(glm::vec2(0), glm::vec2(0), 1));
-			std::cout << "object count : " << objectCount << "\n";
-			glNamedBufferSubData(objectsBuffer, sizeof(PhysicsObject) * objectCount, sizeof(PhysicsObject) * objectsToAdd.size(), objectsToAdd.data());
-		}
-
-		// creates an effect where zooming gets stronger the more you zoom in or out
-		zoomLevel += (zoomLevel * -scrollDelta.y) / 10;
-
-		/// end input
-
-		/// logic
-		velocityCompute.dispatch(objectCount, 1, 1);
-		glFinish();
-		positionCompute.dispatch(objectCount, 1, 1);
-		glFinish();
-
-		/// end logic
-
-		/// rendering
-
-		// ImGui::ShowDemoWindow();
-
-		shader.use();
-
-		shader.set_mat4("view", view);
-		shader.set_mat4("model", model);
-
-		glBindVertexArray(VAO);
-		glDrawArraysInstanced(GL_TRIANGLES, 0, 6, objectCount);
-
-		// not technically necessary but it can make things more consistent
-		glBindVertexArray(0);
-
-		// ImGui::EndFrame();
-
-		// ImGui::Render();
-		// ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-		/// end rendering
-
-		/// more logic
-		objectsToAdd.resize(0);
-		///
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+
+		// /// initialization stuff
+
+		// // ImGui_ImplOpenGL3_NewFrame();
+		// // ImGui_ImplGlfw_NewFrame();
+		// // ImGui::NewFrame();
+
+		// float deltaTimeF = deltaTime;
+
+		// glm::vec2 cursorDelta = inputManager->get_cursor_delta();
+		// glm::vec2 focusedCursorDelta = this->get_cursor_delta_if_focused();
+		// glm::vec2 relativeCursorDelta = this->get_relative_cursor_delta();
+		// glm::vec2 scrollDelta = inputManager->get_scroll_delta();
+
+		// glm::vec2 windowSize = this->get_window_size();
+		// // glm::vec2 windowPos = this->get_window_pos();
+
+		// // float zoomLevelLog = log(zoomLevel);
+		
+		// glm::mat4 view = glm::mat4(1.0f);
+		
+		// glm::vec2 zoomScale = glm::vec2(zoomLevel);
+		// view = glm::scale(view, glm::vec3(zoomScale, 1));
+
+		// view = glm::translate(view, cameraPos);
+
+		// glm::vec2 windowScale = glm::vec2(windowSize.y, windowSize.x);
+		// if (windowSize.x < windowSize.y)
+		// {
+		// 	windowScale /= glm::vec2(windowSize.y);
+		// }
+		// else // if x is greater or equal to y
+		// {
+		// 	windowScale /= glm::vec2(windowSize.x);
+		// }
+		// view = glm::scale(view, glm::vec3(windowScale, 1));
+
+		// glm::mat4 model = glm::mat4(1.0f);
+
+		// /// end init stuff
+
+		// /// input stuff
+
+        // if (inputManager->is_mouse_button_pressed(GLFW_MOUSE_BUTTON_1)) {
+		// 	glm::vec3 moveCam = glm::vec3(relativeCursorDelta.x, -relativeCursorDelta.y, 0.0);
+		// 	moveCam /= zoomLevel;
+		// 	cameraPos += moveCam;
+        // }
+		// if (inputManager->is_key_pressed_this_frame(GLFW_KEY_TAB, GLFW_MOD_SHIFT))
+		// {
+		// 	std::cout << "cameraPos = " << glm::to_string(cameraPos) << "\n";
+		// 	std::cout << "windowScale = " << glm::to_string(windowScale) << "\n";
+        // } 
+		// else if (inputManager->is_key_pressed_this_frame(GLFW_KEY_TAB))
+		// {
+		// 	PhysicsObject* data = new PhysicsObject[TEMP_MAX_OBJECTS]();
+		// 	glGetNamedBufferSubData(objectsBuffer, 0, sizeof(PhysicsObject) * objectCount, data);
+		// 	for (int32_t i = 0; i < objectCount; i++) {
+		// 		PhysicsObject object = data[i];
+		// 		std::cout << i << " : object.position : " << glm::to_string(object.position) << "\n";
+		// 	}
+		// 	std::cout << std::endl;
+		// }
+        // if (inputManager->is_key_pressed_this_frame(GLFW_KEY_T))
+        // {
+		// 	GLint polygonMode;
+		// 	glGetIntegerv(GL_POLYGON_MODE, &polygonMode);
+
+		// 	if (polygonMode == GL_FILL)
+		// 	{
+		// 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		// 	}
+		// 	else
+		// 	{
+		// 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		// 	}
+        // }
+
+        // if (inputManager->is_key_pressed_this_frame(GLFW_KEY_ESCAPE)) {
+        //     glfwSetWindowShouldClose(window, true);
+        // }
+        // if (inputManager->is_key_pressed_this_frame(GLFW_KEY_F)) {
+		// 	int32_t newMode = (get_cursor_mode() == GLFW_CURSOR_DISABLED) ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED;
+		// 	this->set_cursor_mode(newMode);
+        // }
+		// if (inputManager->is_key_pressed_this_frame(GLFW_KEY_E) || inputManager->is_key_pressed(GLFW_KEY_R)) {
+		// 	objectCount++;
+		// 	objectsToAdd.push_back(PhysicsObject(glm::vec2(0), glm::vec2(0), 1));
+		// 	std::cout << "object count : " << objectCount << "\n";
+		// 	glNamedBufferSubData(objectsBuffer, sizeof(PhysicsObject) * objectCount, sizeof(PhysicsObject) * objectsToAdd.size(), objectsToAdd.data());
+		// }
+
+		// // creates an effect where zooming gets stronger the more you zoom in or out
+		// zoomLevel += (zoomLevel * -scrollDelta.y) / 10;
+
+		// /// end input
+
+		// /// logic
+		// velocityCompute.dispatch(objectCount, 1, 1);
+		// glFinish();
+		// positionCompute.dispatch(objectCount, 1, 1);
+		// glFinish();
+
+		// /// end logic
+
+		// /// rendering
+
+		// // ImGui::ShowDemoWindow();
+
+		// shader.use();
+
+		// shader.set_mat4("view", view);
+		// shader.set_mat4("model", model);
+
+		// glBindVertexArray(VAO);
+		// glDrawArraysInstanced(GL_TRIANGLES, 0, 6, objectCount);
+
+		// // not technically necessary but it can make things more consistent
+		// glBindVertexArray(0);
+
+		// // ImGui::EndFrame();
+
+		// // ImGui::Render();
+		// // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		// /// end rendering
+
+		// /// more logic
+		// objectsToAdd.resize(0);
+		// ///
 	}
 }
 
@@ -303,6 +310,7 @@ void GameWindow::initialize_frame()
 	// ImGui::NewFrame();
 }
 
+
 GameWindow* GameWindow::get_game_window(GLFWwindow* window)
 {
     void* possibleGameWindow = glfwGetWindowUserPointer(window);
@@ -313,20 +321,26 @@ GameWindow* GameWindow::get_game_window(GLFWwindow* window)
 	return gameWindow;
 }
 
+
 GLFWwindow* GameWindow::get_window()
 {
     return window;
 }
-
+Scene* GameWindow::get_scene()
+{
+	return scene;
+}
 InputManager* GameWindow::get_input_manager()
 {
 	return inputManager;
 }
 
+
 double GameWindow::get_delta_time()
 {
 	return deltaTime;
 }
+
 
 glm::vec2 GameWindow::get_window_size()
 {
@@ -334,7 +348,6 @@ glm::vec2 GameWindow::get_window_size()
 	glfwGetWindowSize(window, &windowSize.x, &windowSize.y);
 	return static_cast<glm::vec2>(windowSize);
 }
-
 glm::vec2 GameWindow::get_window_pos()
 {
 	glm::vec<2, int32_t> windowPos{};
@@ -346,7 +359,6 @@ int32_t GameWindow::get_cursor_mode()
 {
 	return glfwGetInputMode(window, GLFW_CURSOR);
 }
-
 void GameWindow::set_cursor_mode(int32_t mode)
 {
     glfwSetInputMode(window, GLFW_CURSOR, mode);
@@ -368,7 +380,6 @@ glm::vec2 GameWindow::get_cursor_delta_if_focused()
 		return glm::vec2(0, 0);
 	}
 }
-
 glm::vec2 GameWindow::get_relative_cursor_delta()
 {
 	glm::vec<2, int32_t> windowSize{};

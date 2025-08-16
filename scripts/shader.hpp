@@ -31,7 +31,7 @@ private:
 
     void update_uniforms();
 
-    static inline bool initialized = false;
+    static inline bool s_initialized = false;
 
     static GLuint compile_shader_from_path(int32_t shaderType, const char* path);
     static void add_all_shader_include_strings();
@@ -43,7 +43,7 @@ public:
     // Shader(GLuint program);
 
     // constructor reads and builds the shader
-    Shader(uint argc, ...);
+    Shader(uint32_t argc, ...);
 
     // use/activate the shader
     void use();
@@ -51,7 +51,7 @@ public:
     // utility uniform functions
     GLint get_uniform_location(const std::string& name) const;
     void set_bool (const std::string& name, bool value)                   const;
-    void set_int  (const std::string& name, int32_t value)                    const;
+    void set_int  (const std::string& name, int32_t value)                const;
     void set_float(const std::string& name, float value)                  const;
     void set_vec3 (const std::string& name, glm::vec3 value)              const;
     void set_vec3 (const std::string& name, double x, double y, double z) const;
@@ -88,6 +88,3 @@ struct PhysicsObject
     // don't use this for anything...
     float __buffer;
 };
-
-static GLuint compile_shader(int32_t shaderType, const char* path);
-static uint create_program(int32_t count, ...);
