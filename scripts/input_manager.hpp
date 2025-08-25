@@ -3,11 +3,11 @@
 #include <cstdint>
 #include <map>
 
+#include <glad/glad.h>
 #include "GLFW/glfw3.h"
 
-#include "glm/glm/vec2.hpp" // IWYU pragma: keep
 #define GLM_ENABLE_EXPERIMENTAL
-#include "glm/glm/gtx/string_cast.hpp"
+#include "glm/glm/glm.hpp" // IWYU pragma: keep, common header
 
 typedef uint32_t KeyState;
 constexpr KeyState KEY_RELEASED = 1 << 0;

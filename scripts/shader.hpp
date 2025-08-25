@@ -1,17 +1,14 @@
 #pragma once
 
-#include <glad/glad.h>
-
-#include <glm/glm/fwd.hpp>
-#include "glm/glm/gtc/type_ptr.hpp" // IWYU pragma: keep, common header
-
 #include <map>
 #include <string>
 #include <filesystem>
 
+#include <glad/glad.h>
+
+#include "glm/glm/glm.hpp" // IWYU pragma: keep, common header
 
 namespace fs = std::filesystem;
-
 
 class Shader
 {

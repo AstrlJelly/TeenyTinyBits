@@ -1,10 +1,10 @@
 #include "main.hpp"
 
+#include <iostream>
+
 // need to put this in the cpp file
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
-
-#include <iostream>
 
 #include "constants.hpp"
 #include "game_window.hpp"

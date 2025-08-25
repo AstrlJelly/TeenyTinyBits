@@ -7,7 +7,7 @@
 // #include <ImGui/imgui.h>
 // #include <ImGui/backends/imgui_impl_glfw.h>
 // #include <ImGui/backends/imgui_impl_opengl3.h>
-#include <glm/glm/fwd.hpp>
+#include <glm/glm/glm.hpp>
 
 #include "scene.hpp"
 #include "input_manager.hpp"
@@ -25,11 +25,8 @@ private:
     double deltaTime;
     double lastFrameTime;
 
-    static inline bool s_glfwInitialized = false;
-    static inline bool s_gladInitialized = false;
-
-    static void init_glfw();
-    static void init_glad();
+    static void init_glfw_if_not_init();
+    static void init_glad_if_not_init();
 
     static void on_framebuffer_size_glfw(GLFWwindow* window, int32_t width, int32_t height);
     

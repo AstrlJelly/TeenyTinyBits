@@ -1,7 +1,10 @@
 #include "shader.hpp"
+
 #include <cstdarg>
 #include <fstream>
 #include <iostream>
+
+#include "glm/glm/gtc/type_ptr.hpp"
 
 Shader::Shader(uint32_t shaderCount, ...)
 {

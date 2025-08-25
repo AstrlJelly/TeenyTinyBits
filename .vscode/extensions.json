@@ -6,5 +6,6 @@
         "antaalt.shader-validator",
         "llvm-vs-code-extensions.vscode-clangd",
         "dtoplak.vscode-glsllint",
+        "fabiospampinato.vscode-highlight",
     ]
 }

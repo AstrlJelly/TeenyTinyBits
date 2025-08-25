@@ -1,5 +1,6 @@
-#include "game_window.hpp"
 #include "input_manager.hpp"
+
+#include "game_window.hpp"
 
 KeyStateInfo::KeyStateInfo(KeyState state, int32_t mods)
 {
