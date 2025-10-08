@@ -96,6 +96,3 @@ T* Scene::assign(EntityId entityId)
 	entity.set_bit_in_mask(componentId, true);
 	return pComponent;
 }
-
-template Transform* Scene::assign<Transform>(EntityId id);
-// DEFINE_ALL_COMPONENT_FUNCTIONS(template T* Scene::assign<T> );
