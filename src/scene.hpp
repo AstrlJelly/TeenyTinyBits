@@ -26,7 +26,7 @@
 typedef int32_t EntityInt;
 typedef EntityInt EntityId;
 
-constexpr EntityInt ENTITY_START_CAPACITY = 0x1000;
+constexpr EntityInt ENTITY_START_CAPACITY = 0xFFFF;
 
 constexpr EntityInt MAX_COMPONENT_TYPES = 32;
 // can be replaced with `std::dynamic_bitset` if 'tis wished to be dynamic
@@ -48,10 +48,11 @@ public:
     void set_bit_in_mask(EntityInt position, bool value = true);
 };
 
+// simple wrapper around a void pointer vector for typez
 class ComponentPool
 {
 private:
-    // TODO: optimize with indexes so data can be cache hit
+    // TODO: optimize with indexes so data can be cache hit (and for lower memory usage?)
     // std::vector<EntityInt> indexes;
     std::vector<void*> pData;
 
@@ -62,7 +63,7 @@ public:
     template<class T>
     inline T* at(EntityInt index);
 
-    inline EntityInt get_size();
+    EntityInt get_size();
 };
 
 class Scene
@@ -83,6 +84,12 @@ public:
 
     EntityId new_entity();
 
+    // i will do my best to not make this AWFULLY optimized like unity did
+    template<class T>
+    T* get_component();
+
     template<class T>
     T* assign(EntityId id);
 };
+
+#include "scene.hxx"

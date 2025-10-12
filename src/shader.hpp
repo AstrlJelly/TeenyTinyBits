@@ -81,7 +81,10 @@ struct PhysicsObject
     glm::vec2 position;
     glm::vec2 velocity;
     float radius;
-    // this will make the struct be the same size as the struct in glsl.
-    // don't use this for anything...
+    /*
+     * this will make the cpp struct be the same size as the glsl struct.
+     * fixes some issues with how padding works, cuz of alignment stuffz
+     * don't use this for anything... or do. i'm not your mom (hopefully?)
+     */
     float __buffer;
 };

@@ -87,6 +87,8 @@ void GameWindow::start_game_loop()
 {
 	EntityId entity = scene->new_entity();
 	Transform* transform = scene->assign<Transform>(entity);
+
+	int currentEntityIndex = 0;
 	
 	while (!glfwWindowShouldClose(window))
 	{

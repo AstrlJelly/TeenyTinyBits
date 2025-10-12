@@ -4,7 +4,7 @@ project(TeenyTinyBits VERSION 0.2.1)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(PROJECT_SCRIPTS_DIR "${PROJECT_SOURCE_DIR}/scripts")
+set(PROJECT_SCRIPTS_DIR "${PROJECT_SOURCE_DIR}/src")
 set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include")
 
 configure_file("${PROJECT_SCRIPTS_DIR}/constants.hpp.in" "${PROJECT_BINARY_DIR}/constants.hpp")
