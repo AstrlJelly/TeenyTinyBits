@@ -16,9 +16,10 @@ EntityInt Scene::get_component_id()
 }
 
 template<class T>
-T* Scene::get_component()
+T* Scene::get_component(EntityId entityId)
 {
-
+	T* component = allComponentPools[entityId];
+	return component;
 }
 
 template<class T>
@@ -35,13 +36,13 @@ T* Scene::assign(EntityId entityId)
 
 	ComponentPool componentPool = allComponentPools[componentId];
 
-	// if new component, make a new pool
+	// if new component (aka vector is uninitialized) make a new pool
 	if (componentPool.get_size() <= 0)
 	{
 		allComponentPools[componentId] = ComponentPool();
 	}
 
-	EntityDesc entity = allEntities.at(entityId);
+	Entity entity = allEntities.at(entityId);
 
 	// this was recommended; seems like it just breaks things?
 	// T* pComponent = new (componentPool.at(entityId)) T();

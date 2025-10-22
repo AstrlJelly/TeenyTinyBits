@@ -34,6 +34,12 @@ public:
     GameWindow(glm::vec2 size, const char* title);
     ~GameWindow();
 
+    /**
+     * @brief Statically get the game window object from a GLFWwindow
+     * 
+     * @param window A GLFWwindow 
+     * @return The pointer in GLFWwindow static casted to GameWindow* 
+     */
     static GameWindow* get_game_window(GLFWwindow* window);
 
     void start_game_loop();

@@ -4,22 +4,22 @@
 
 // #include "components/transform.hpp"
 
-EntityDesc::EntityDesc(EntityId id, ComponentMask mask)
+Entity::Entity(EntityId id, ComponentMask mask)
 {
 	this->id = id;
 	this->mask = mask;
 }
 
-EntityId EntityDesc::get_id()
+EntityId Entity::get_id()
 {
 	return this->id;
 }
-ComponentMask EntityDesc::get_mask()
+ComponentMask Entity::get_mask()
 {
 	return this->mask;
 }
 
-void EntityDesc::set_bit_in_mask(EntityInt position, bool value)
+void Entity::set_bit_in_mask(EntityInt position, bool value)
 {
 	this->mask.set(position, value);
 }
@@ -49,7 +49,7 @@ Scene::Scene()
 EntityId Scene::new_entity()
 {
 	EntityId entityId = static_cast<EntityId>(allEntities.size());
-	EntityDesc newEntity = EntityDesc(entityId, ComponentMask());
+	Entity newEntity = Entity(entityId, ComponentMask());
     allEntities.push_back(newEntity);
     return entityId;
 }
