@@ -3,33 +3,37 @@
 #include <iostream>
 
 #include "GLFW/glfw3.h"
+#include <memory>
 #include <stb/stb_image.h>
 
 #include "scene.hpp"
 #include "input_manager.hpp"
 #include "components/transform.hpp"
 
-GameWindow::GameWindow(glm::vec2 size, const char* title)
+GameWindow GameWindow::create(glm::vec2 size, const std::string& title)
 {
 	init_glfw_if_not_init();
+	GameWindow base;
 
-	this->window = glfwCreateWindow(size.x, size.y, title, NULL, NULL);
-	if (window == nullptr)
+	base.window = glfwCreateWindow(size.x, size.y, title.c_str(), NULL, NULL);
+	if (base.window == nullptr)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
         throw;
 	}
-	glfwMakeContextCurrent(window);
-	glfwSetWindowUserPointer(window, this);
+	glfwMakeContextCurrent(base.window);
+	glfwSetWindowUserPointer(base.window, &base);
 	glfwSwapInterval(1);
 
-	glfwSetFramebufferSizeCallback(window, on_framebuffer_size_glfw);
+	glfwSetFramebufferSizeCallback(base.window, on_framebuffer_size_glfw);
 
 	init_glad_if_not_init();
 
-    this->scene = new Scene();
-    this->inputManager = new InputManager(window);
+    base.scene = std::make_unique<Scene>();
+    base.inputManager = std::make_unique<InputManager>(InputManager::create(base.window));
+
+	return base;
 }
 
 void GameWindow::init_glfw_if_not_init()
@@ -70,12 +74,6 @@ void GameWindow::init_glad_if_not_init()
 
 		s_gladInitialized = true;
 	}
-
-}
-
-GameWindow::~GameWindow()
-{
-    delete inputManager;
 }
 
 void GameWindow::on_framebuffer_size_glfw(GLFWwindow* window, int32_t width, int32_t height)
@@ -86,7 +84,7 @@ void GameWindow::on_framebuffer_size_glfw(GLFWwindow* window, int32_t width, int
 void GameWindow::start_game_loop()
 {
 	EntityId entity = scene->new_entity();
-	Transform* transform = scene->assign<Transform>(entity);
+	std::weak_ptr<Transform> transform = scene->assign<Transform>(entity);
 
 	int currentEntityIndex = 0;
 	
@@ -123,7 +121,6 @@ GameWindow* GameWindow::get_game_window(GLFWwindow* window)
     void* possibleGameWindow = glfwGetWindowUserPointer(window);
 	// scary!!
 	// shouldn't ever be called without it being valid, though.
-	// i'll only use GLFWwindow in the context of GameWindow
     GameWindow* gameWindow = static_cast<GameWindow*>(possibleGameWindow);
 	return gameWindow;
 }
@@ -133,11 +130,11 @@ GLFWwindow* GameWindow::get_window()
 {
     return window;
 }
-Scene* GameWindow::get_scene()
+std::shared_ptr<Scene> GameWindow::get_scene()
 {
 	return scene;
 }
-InputManager* GameWindow::get_input_manager()
+std::shared_ptr<InputManager> GameWindow::get_input_manager()
 {
 	return inputManager;
 }
