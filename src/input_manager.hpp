@@ -4,6 +4,7 @@
 #include <map>
 
 #include <glad/glad.h>
+#include <memory>
 #include "GLFW/glfw3.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -15,14 +16,17 @@ constexpr KeyState KEY_PRESSED  = 1 << 1;
 
 class KeyStateInfo
 {
+private:
     KeyState keyState;
     int32_t modState;
     double timestamp;
 
 public:
-    KeyStateInfo(KeyState state = KEY_RELEASED, int32_t mods = 0);
+    KeyStateInfo() {};
+    static KeyStateInfo create(KeyState state = KEY_RELEASED, int32_t mods = 0);
 
-    void   update_timestamp();
+    void update_timestamp();
+    
     void   set_timestamp(double time);
     double get_timestamp();
 
@@ -36,6 +40,7 @@ public:
 
 class InputManager
 {
+private:
     // key state (GLFW_KEY_A), keystate (duh)
     std::map<int32_t, KeyStateInfo> allKeyStates;
     std::map<int32_t, KeyStateInfo> allMouseButtonStates;
@@ -52,14 +57,15 @@ class InputManager
     // shouldn't really be used, it's highly likely that this changes throughout the frame
     glm::vec2 realTimeScrollDelta;
 
-    static void on_key_glfw_callback         (GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods);
-    static void on_mouse_button_glfw_callback(GLFWwindow *window, int32_t button, int32_t action, int32_t mods);
-    static void on_cursor_move_glfw_callback (GLFWwindow *window, double x, double y);
-    static void on_scroll_glfw_callback      (GLFWwindow *window, double xoffset, double yoffset);
+    static void on_key_glfw_callback         (GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods);
+    static void on_mouse_button_glfw_callback(GLFWwindow* window, int32_t button, int32_t action, int32_t mods);
+    static void on_cursor_move_glfw_callback (GLFWwindow* window, double x, double y);
+    static void on_scroll_glfw_callback      (GLFWwindow* window, double xoffset, double yoffset);
 
 public:
-    InputManager(GLFWwindow* window);
-    static InputManager* get_input_manager(GLFWwindow* window);
+    InputManager() {};
+    static InputManager create(GLFWwindow* window);
+    static std::shared_ptr<InputManager> get_input_manager(GLFWwindow* window);
 
     KeyStateInfo operator[](int32_t key);
 

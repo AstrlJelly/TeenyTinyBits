@@ -8,6 +8,7 @@
 // #include <ImGui/backends/imgui_impl_glfw.h>
 // #include <ImGui/backends/imgui_impl_opengl3.h>
 #include <glm/glm/glm.hpp>
+#include <memory>
 
 #include "scene.hpp"
 #include "input_manager.hpp"
@@ -17,10 +18,10 @@
 
 class GameWindow
 {
-private:
+private:    
     GLFWwindow* window;
-    Scene* scene;
-    InputManager* inputManager;
+    std::shared_ptr<Scene> scene;
+    std::shared_ptr<InputManager> inputManager;
 
     double deltaTime;
     double lastFrameTime;
@@ -31,23 +32,23 @@ private:
     static void on_framebuffer_size_glfw(GLFWwindow* window, int32_t width, int32_t height);
     
 public:
-    GameWindow(glm::vec2 size, const char* title);
-    ~GameWindow();
+    GameWindow() {};
+    static GameWindow create(glm::vec2 size, const std::string& title);
 
     /**
-     * @brief Statically get the game window object from a GLFWwindow
+     * @brief Statically get the game window object from a `GLFWwindow`
      * 
-     * @param window A GLFWwindow 
-     * @return The pointer in GLFWwindow static casted to GameWindow* 
+     * @param window A GLFWwindow created from `GameWindow`
+     * @return The pointer in `GLFWwindow` static casted to `GameWindow*`
      */
     static GameWindow* get_game_window(GLFWwindow* window);
 
     void start_game_loop();
     void initialize_frame();
 
-    GLFWwindow*   get_window();
-    Scene*        get_scene();
-    InputManager* get_input_manager();
+    GLFWwindow*                   get_window();
+    std::shared_ptr<Scene>        get_scene();
+    std::shared_ptr<InputManager> get_input_manager();
 
     glm::vec2 get_window_size();
     glm::vec2 get_window_pos();

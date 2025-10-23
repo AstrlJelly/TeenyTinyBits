@@ -2,6 +2,7 @@
 
 #include <bitset>
 #include <cstdint>
+#include <memory>
 #include <vector>
 
 #include <boost/preprocessor.hpp>
@@ -48,7 +49,6 @@ public:
     void set_bit_in_mask(EntityInt position, bool value = true);
 };
 
-/** */
 class ComponentPool
 {
 private:
@@ -59,9 +59,11 @@ private:
 public:
     ComponentPool();
 
+    // for the risky boys and girls
     inline void* at(EntityId index);
+    
     template<class T>
-    inline T* at(EntityId index);
+    inline std::weak_ptr<T> at(EntityId index);
 
     EntityInt get_size();
 };
@@ -86,10 +88,10 @@ public:
 
     // i will do my best to not make this AWFULLY optimized like unity did
     template<class T>
-    T* get_component(EntityId entityId);
+    std::weak_ptr<T> get_component(EntityId entityId);
 
     template<class T>
-    T* assign(EntityId id);
+    std::weak_ptr<T> assign(EntityId id);
 };
 
 #include "scene.hxx"

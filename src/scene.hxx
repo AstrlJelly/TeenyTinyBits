@@ -1,8 +1,9 @@
 #pragma once
 #include "scene.hpp"
+#include <memory>
 
 template<class T>
-T* ComponentPool::at(EntityInt index)
+std::weak_ptr<T> ComponentPool::at(EntityInt index)
 {
 	return static_cast<T*>(pData[index]);
 }
@@ -16,14 +17,14 @@ EntityInt Scene::get_component_id()
 }
 
 template<class T>
-T* Scene::get_component(EntityId entityId)
+std::weak_ptr<T> Scene::get_component(EntityId entityId)
 {
 	T* component = allComponentPools[entityId];
 	return component;
 }
 
 template<class T>
-T* Scene::assign(EntityId entityId)
+std::weak_ptr<T> Scene::assign(EntityId entityId)
 {
     int componentId = get_component_id<T>();
 
@@ -48,8 +49,10 @@ T* Scene::assign(EntityId entityId)
 	// T* pComponent = new (componentPool.at(entityId)) T();
     
     // heap allocation. i hope to remedy this
-	T* pComponent = new T();
+	std::shared_ptr<T> pComponent = std::make_shared<T>();
 
 	entity.set_bit_in_mask(componentId, true);
-	return pComponent;
+
+	// the component should never be handled by a user
+	return std::weak_ptr<T>(pComponent);
 }

@@ -4,10 +4,14 @@
 #include <fstream>
 #include <iostream>
 
+#include "glad/glad.h"
 #include "glm/glm/gtc/type_ptr.hpp"
 
-Shader::Shader(uint32_t shaderCount, ...)
+Shader Shader::create(uint32_t shaderCount, ...)
 {
+    Shader base;
+    std::cout << base.programID << std::endl;
+
     if (!s_initialized)
     {
         Shader::add_all_shader_include_strings();
@@ -27,20 +31,20 @@ Shader::Shader(uint32_t shaderCount, ...)
     va_end(args);
 
     // shader Program
-    this->programID = glCreateProgram();
+    base.programID = glCreateProgram();
     for (int32_t i = 0; i < shaderCount; i++) {
         GLuint shaderId = shaderIds[i];
-        glAttachShader(programID, shaderId);
+        glAttachShader(base.programID, shaderId);
     }
-    glLinkProgram(programID);
+    glLinkProgram(base.programID);
     
     int32_t success;
     char infoLog[512];
     // print linking errors if any
-    glGetProgramiv(programID, GL_LINK_STATUS, &success);
+    glGetProgramiv(base.programID, GL_LINK_STATUS, &success);
     if (!success)
     {
-        glGetProgramInfoLog(programID, 512, NULL, infoLog);
+        glGetProgramInfoLog(base.programID, 512, NULL, infoLog);
         std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
         exit(1);
     }
@@ -51,31 +55,39 @@ Shader::Shader(uint32_t shaderCount, ...)
         glDeleteShader(shaderId);
     }
 
-    this->update_uniforms();
+    base.initialize_uniforms();
+
+    return base;
 }
 
-ComputeShader::ComputeShader(const char* computePath) 
-    : Shader(1,
-        GL_COMPUTE_SHADER, computePath
-    ) {}
+PipelineShader PipelineShader::create(const std::string& vertexPath, const std::string& fragmentPath)
+{
+    PipelineShader base;
+    base.pipelineShader = Shader::create(2,
+        GL_VERTEX_SHADER, vertexPath.c_str(),
+        GL_FRAGMENT_SHADER, fragmentPath.c_str()
+    );
+    return base;
+}
+
+ComputeShader ComputeShader::create(const std::string& computePath)
+{
+    ComputeShader base;
+    base.computeShader = Shader::create(1, GL_COMPUTE_SHADER, computePath.c_str());
+    return base;
+}
 
 void ComputeShader::dispatch_indirect()
 {
-    this->use();
+    computeShader.use();
     glDispatchComputeIndirect(0);
 }
 
 void ComputeShader::dispatch(int32_t x, int32_t y, int32_t z)
 {
-    this->use();
+    computeShader.use();
     glDispatchCompute(x, y, z);
 }
-
-PipelineShader::PipelineShader(const char* vertexPath, const char* fragmentPath)
-    : Shader(2,
-        GL_VERTEX_SHADER, vertexPath,
-        GL_FRAGMENT_SHADER, fragmentPath
-    ) {}
 
 GLuint Shader::compile_shader_from_path(int32_t shaderType, const char* path)
 {
@@ -138,7 +150,7 @@ GLuint Shader::compile_shader_from_path(int32_t shaderType, const char* path)
     return shaderID;
 }
 
-void Shader::update_uniforms()
+void Shader::initialize_uniforms()
 {
     GLint size; // size of the variable
     GLenum type; // type of the variable (float, vec3 or mat4, etc)

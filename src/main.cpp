@@ -15,9 +15,9 @@ int32_t main(void)
 	// 					      << TeenyTinyBits_VERSION_PATCH << '\n';
 
 
-	GameWindow* gw = new GameWindow(glm::vec2(1920, 1080), "TeenyTinyBits");
+	GameWindow gw = GameWindow::create(glm::vec2(1920, 1080), "TeenyTinyBits");
 
-	gw->start_game_loop();
+	gw.start_game_loop();
 
 	glfwTerminate();
 	// ImGui::DestroyContext();
