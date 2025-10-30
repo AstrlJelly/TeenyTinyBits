@@ -52,9 +52,11 @@ jobs:
       uses: MarkusJx/install-boost@v2.5.1
       with:
         # The boost version to install, e.g. "1.73.0"
-        boost_version: "1.83.0"
+        boost_version: 1.83.0
+        platform_version: 20.04
+        version: default
         # The toolset used to compile boost, e.g. "msvc"
-        toolset: "clang"
+        toolset: clang
         # Whether the boost libraries are linked statically or dynamically
         link: static
         # The architecture the binaries were built for
