@@ -7,11 +7,16 @@
 #include "glad/glad.h"
 #include "glm/glm/gtc/type_ptr.hpp"
 
-Shader Shader::create(uint32_t shaderCount, ...)
+ShaderInfo ShaderInfo::create(ShaderType type, std::string path)
 {
-    Shader base;
-    std::cout << base.programID << std::endl;
+    ShaderInfo base;
+    base.type = type;
+    base.path = path;
+    return base;
+}
 
+Shader Shader::create(std::initializer_list<ShaderInfo> shaderInfos)
+{
     if (!s_initialized)
     {
         Shader::add_all_shader_include_strings();
@@ -19,42 +24,40 @@ Shader Shader::create(uint32_t shaderCount, ...)
         s_initialized = true;
     }
 
-    std::va_list args;
-
-    GLuint shaderIds[shaderCount];
-    va_start(args, shaderCount);
-    for (int32_t i = 0; i < shaderCount; i++) {
-        int32_t shaderType = va_arg(args, int32_t);
-        const char* shaderPath = va_arg(args, const char*);
-        shaderIds[i] = compile_shader_from_path(shaderType, shaderPath);
+    GLuint shaderIds[shaderInfos.size()];
+    for (int32_t i = 0; i < shaderInfos.size(); i++) {
+        // funny indexing
+        ShaderInfo shaderInfo = *(shaderInfos.begin() + i);
+        shaderIds[i] = compile_shader_from_path(shaderInfo.type, shaderInfo.path.c_str());
     }
-    va_end(args);
 
     // shader Program
-    base.programID = glCreateProgram();
-    for (int32_t i = 0; i < shaderCount; i++) {
+    GLuint programID = glCreateProgram();
+    for (int32_t i = 0; i < shaderInfos.size(); i++) {
         GLuint shaderId = shaderIds[i];
-        glAttachShader(base.programID, shaderId);
+        glAttachShader(programID, shaderId);
     }
-    glLinkProgram(base.programID);
+    glLinkProgram(programID);
     
     int32_t success;
     char infoLog[512];
     // print linking errors if any
-    glGetProgramiv(base.programID, GL_LINK_STATUS, &success);
+    glGetProgramiv(programID, GL_LINK_STATUS, &success);
     if (!success)
     {
-        glGetProgramInfoLog(base.programID, 512, NULL, infoLog);
+        glGetProgramInfoLog(programID, 512, NULL, infoLog);
         std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
         exit(1);
     }
     
     // delete the shaders as they're linked into our program now and no longer necessary
-    for (int32_t i = 0; i < shaderCount; i++) {
+    for (int32_t i = 0; i < shaderInfos.size(); i++) {
         GLuint shaderId = shaderIds[i];
         glDeleteShader(shaderId);
     }
 
+    Shader base;
+    base.programID = programID;
     base.initialize_uniforms();
 
     return base;
@@ -63,17 +66,19 @@ Shader Shader::create(uint32_t shaderCount, ...)
 PipelineShader PipelineShader::create(const std::string& vertexPath, const std::string& fragmentPath)
 {
     PipelineShader base;
-    base.pipelineShader = Shader::create(2,
-        GL_VERTEX_SHADER, vertexPath.c_str(),
-        GL_FRAGMENT_SHADER, fragmentPath.c_str()
-    );
+    base.pipelineShader = Shader::create({
+        ShaderInfo::create(ShaderType::Vertex, vertexPath),
+        ShaderInfo::create(ShaderType::Fragment, fragmentPath)
+    });
     return base;
 }
 
 ComputeShader ComputeShader::create(const std::string& computePath)
 {
     ComputeShader base;
-    base.computeShader = Shader::create(1, GL_COMPUTE_SHADER, computePath.c_str());
+    base.computeShader = Shader::create({
+        ShaderInfo::create(ShaderType::Compute, computePath)
+    });
     return base;
 }
 
@@ -89,7 +94,7 @@ void ComputeShader::dispatch(int32_t x, int32_t y, int32_t z)
     glDispatchCompute(x, y, z);
 }
 
-GLuint Shader::compile_shader_from_path(int32_t shaderType, const char* path)
+GLuint Shader::compile_shader_from_path(ShaderType shaderType, const char* path)
 {
     std::string code;
     std::ifstream shaderFile;
@@ -114,7 +119,7 @@ GLuint Shader::compile_shader_from_path(int32_t shaderType, const char* path)
     const char* shaderCode = code.c_str();
 
     // compile shader
-    uint shaderID = glCreateShader(shaderType);
+    uint shaderID = glCreateShader(static_cast<GLenum>(shaderType));
     glShaderSource(shaderID, 1, &shaderCode, NULL);
 
     fs::path absoluteIncludePath = fs::absolute(shaderIncludePath);
@@ -173,9 +178,9 @@ void Shader::initialize_uniforms()
     }
 }
 
-const std::string& Shader::get_shader_type_string(int32_t shaderType)
+std::string Shader::get_shader_type_string(ShaderType shaderType)
 {
-    return SHADER_TYPE_STRINGS.at(shaderType);
+    return "";
 }
 
 void Shader::add_all_shader_include_strings()

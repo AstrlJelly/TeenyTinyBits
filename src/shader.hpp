@@ -10,16 +10,27 @@
 
 namespace fs = std::filesystem;
 
+enum class ShaderType
+{
+    Compute  = GL_COMPUTE_SHADER,
+    Geometry = GL_GEOMETRY_SHADER,
+    Fragment = GL_FRAGMENT_SHADER,
+    Vertex   = GL_VERTEX_SHADER,
+};
+
+
+struct ShaderInfo
+{
+    ShaderType type;
+    std::string path;
+
+    ShaderInfo() {};
+    static ShaderInfo create(ShaderType type, std::string path);
+};
+
 class Shader
 {
 private:
-    static const inline std::map<int32_t, const std::string> SHADER_TYPE_STRINGS = {
-        { GL_COMPUTE_SHADER,  "COMPUTE" },
-        { GL_GEOMETRY_SHADER, "GEOMETRY" },
-        { GL_FRAGMENT_SHADER, "FRAGMENT" },
-        { GL_VERTEX_SHADER,   "VERTEX" },
-    };
-
     // the program ID
     GLuint programID;
 
@@ -42,7 +53,7 @@ private:
     * @note Variadic functions cannot include non-trivial types (such as const std::string&), so this uses a C string
     * @return GLuint Location of compiled shader
     */
-    static GLuint compile_shader_from_path(int32_t shaderType, const char* path);
+    static GLuint compile_shader_from_path(ShaderType shaderType, const char* path);
     static void add_all_shader_include_strings();
     
 public:
@@ -52,7 +63,7 @@ public:
     // Shader(GLuint program);
 
     // reads and compiles the shader
-    static Shader create(uint32_t argc, ...);
+    static Shader create(std::initializer_list<ShaderInfo> shaderInfos);
 
     // use/activate the shader
     void use();
@@ -84,12 +95,12 @@ public:
     static bool is_shader(GLuint programID);
 
     /**
-     * @brief Get the name of the type of shader inputted at runtime
+     * @brief Get the name of the inputted type of shader
      * 
-     * @param shaderType Must be GL_***_SHADER
-     * @return const std::string& 
+     * @param shaderType
+     * @return std::string
      */
-    static const std::string& get_shader_type_string(int32_t shaderType);
+    static std::string get_shader_type_string(ShaderType shaderType);
 };
 
 class PipelineShader

@@ -9,6 +9,7 @@
 #include "scene.hpp"
 #include "input_manager.hpp"
 #include "components/transform.hpp"
+#include "shader.hpp"
 
 GameWindow GameWindow::create(glm::vec2 size, const std::string& title)
 {
@@ -87,6 +88,9 @@ void GameWindow::start_game_loop()
 	std::weak_ptr<Transform> transform = scene->assign<Transform>(entity);
 
 	int currentEntityIndex = 0;
+
+	PipelineShader shader = PipelineShader::create("./shaders/shader.vert", "./shaders/shader.frag");
+	// shader
 	
 	while (!glfwWindowShouldClose(window))
 	{
