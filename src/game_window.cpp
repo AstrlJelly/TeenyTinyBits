@@ -85,7 +85,7 @@ void GameWindow::on_framebuffer_size_glfw(GLFWwindow* window, int32_t width, int
 void GameWindow::start_game_loop()
 {
 	EntityId entity = scene->new_entity();
-	std::weak_ptr<Transform> transform = scene->assign<Transform>(entity);
+	Transform& transform = scene->add_component<Transform>(entity);
 
 	int currentEntityIndex = 0;
 
