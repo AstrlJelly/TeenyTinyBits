@@ -1,8 +1,9 @@
 #pragma once
 
+#include <array>
 #include <bitset>
 #include <cstdint>
-#include <vector>
+#include <type_traits>
 
 #include <boost/preprocessor.hpp>
 
@@ -17,6 +18,13 @@ constexpr EntityInt MAX_COMPONENT_TYPES = 32;
 // can be replaced with `std::dynamic_bitset` if 'tis wished to be dynamic
 typedef std::bitset<MAX_COMPONENT_TYPES> ComponentMask;
 
+template<class T>
+concept ComponentData = requires
+{
+    { T() };
+    requires !std::is_arithmetic_v<T>;
+    requires !std::is_pointer_v<T>;
+};
 
 struct Entity
 {
@@ -33,33 +41,27 @@ public:
     void set_bit_in_mask(EntityInt position, bool value = true);
 };
 
-class IComponentPool
+struct IComponentPool
 {
-public:
-    template<class T>
-    inline void set(EntityId index);
-    template<class T>
-    inline T at(EntityId index);
-
-    virtual EntityInt get_size();
+    virtual ~IComponentPool() {};
 };
 
-template<class T>
+template<ComponentData T>
 class ComponentPool : public IComponentPool
 {
 private:
     // TODO: optimize with indexes so data can be cache hit (and for lower memory usage?)
     // std::vector<EntityInt> indexes;
-    std::vector<T> componentsData;
+    std::array<T, ENTITY_START_CAPACITY> componentsData;
 
 public:
-    ComponentPool();
+    ComponentPool<T>();
 
     // for the risky boys and girls
     // inline void* at(EntityId index);
     
-    inline T set(EntityId index);
-    inline T at(EntityId index);
+    T& set(EntityId index);
+    T& at (EntityId index);
 
     EntityInt get_size();
 };

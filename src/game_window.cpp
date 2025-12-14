@@ -8,8 +8,8 @@
 
 #include "scene.hpp"
 #include "input_manager.hpp"
-#include "components/transform.hpp"
 #include "shader.hpp"
+#include "components/transform.hpp"
 
 GameWindow GameWindow::create(glm::vec2 size, const std::string& title)
 {
@@ -85,7 +85,7 @@ void GameWindow::on_framebuffer_size_glfw(GLFWwindow* window, int32_t width, int
 void GameWindow::start_game_loop()
 {
 	EntityId entity = scene->new_entity();
-	Transform& transform = scene->add_component<Transform>(entity);
+	Transform transform = scene->add_component<Transform>(entity);
 
 	int currentEntityIndex = 0;
 

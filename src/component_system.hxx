@@ -2,26 +2,26 @@
 #include "component_system.hpp"
 
 
-
-template<class T>
+template<ComponentData T>
 ComponentPool<T>::ComponentPool()
 {
-	componentsData = std::vector<T>(ENTITY_START_CAPACITY);
+	componentsData = std::array<T, ENTITY_START_CAPACITY>();
 }
 
-template<class T>
-T ComponentPool<T>::set(EntityInt index)
+template<ComponentData T>
+T& ComponentPool<T>::set(EntityId index)
 {
-	return componentsData[index] = T();
+	componentsData[index] = {};
+	return this->at(index);
 }
 
-template<class T>
-T ComponentPool<T>::at(EntityInt index)
+template<ComponentData T>
+T& ComponentPool<T>::at(EntityInt index)
 {
-	return componentsData[index];
+	return componentsData.at(index);
 }
 
-template<class T>
+template<ComponentData T>
 EntityInt ComponentPool<T>::get_size()
 {
 	return componentsData.size();

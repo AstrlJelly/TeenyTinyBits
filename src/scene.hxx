@@ -4,45 +4,44 @@
 #include <memory>
 
 
-template<class T>
+template<ComponentData T>
 EntityInt Scene::get_component_id()
 {
 	static int32_t s_componentId = s_componentTypeCounter++;
 	return s_componentId;
 }
 
-template<class T>
+template<ComponentData T>
 T& Scene::get_component(EntityId entityId)
 {
 	T componentId = get_component_id<T>();
 	ComponentPool<T> componentPool = allComponentPools[componentId];
-	return std::weak_ptr<T>(&componentPool.at(entityId));
+	return &componentPool.at(entityId);
 }
 
-template<class T>
+template<ComponentData T>
 T& Scene::add_component(EntityId entityId)
 {
     int componentId = get_component_id<T>();
 
-	// the vector should be sized appropriately on construction
+	// the array should be sized appropriately on construction
 	// so, only necessary with dynamic sizing
 	// if (allComponentPools.size() <= componentId)
 	// {
 	// 	allComponentPools.resize(allComponentPools.capacity() * 2);
 	// }
 
-	std::shared_ptr<IComponentPool> componentPool = (allComponentPools.at(componentId));
 
-	// if new component (aka vector is uninitialized) make a new pool
-	if (componentPool->get_size() <= 0)
+	if (allComponentPools.at(componentId) == nullptr)
 	{
-		allComponentPools[componentId] = std::unique_ptr<ComponentPool<T>>();
-		componentPool = allComponentPools[componentId];
+		allComponentPools[componentId] = std::make_shared<ComponentPool<T>>();
 	}
+
+	ComponentPool<T>* componentPool = static_cast<ComponentPool<T>*>(allComponentPools.at(componentId).get());
 
 	Entity entity = allEntities.at(entityId);
 	entity.set_bit_in_mask(componentId, true);
 	
-	componentPool->set<T>(entityId);
-	return componentPool->at<T>(entityId);
+	componentPool->set(entityId);
+	return componentPool->at(entityId);
 }

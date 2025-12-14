@@ -21,17 +21,13 @@ public:
 
     // will get the id associated with the type inputted
     // stays consistent because of how templates work
-    template<class T>
-    EntityInt get_component_id();
+    template<ComponentData T> EntityInt get_component_id();
 
     EntityId new_entity();
 
     // i will do my best to not make this AWFULLY optimized like unity did
-    template<class T>
-    T& get_component(EntityId entityId);
-
-    template<class T>
-    T& add_component(EntityId id);
+    template<ComponentData T> T& get_component(EntityId entityId);
+    template<ComponentData T> T& add_component(EntityId id);
 };
 
 #include "scene.hxx"
