@@ -10,32 +10,32 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/glm/glm.hpp" // IWYU pragma: keep, common header
 
-typedef uint32_t KeyState;
-constexpr KeyState KEY_RELEASED = 1 << 0;
-constexpr KeyState KEY_PRESSED  = 1 << 1;
+typedef uint32_t KeyState_t;
+constexpr KeyState_t KEY_RELEASED = 1 << 0;
+constexpr KeyState_t KEY_PRESSED  = 1 << 1;
 
 class KeyStateInfo
 {
 private:
-    KeyState keyState;
+    KeyState_t keyState;
     int32_t modState;
     double timestamp;
 
 public:
     KeyStateInfo() {};
-    static KeyStateInfo create(KeyState state = KEY_RELEASED, int32_t mods = 0);
+    static KeyStateInfo create(KeyState_t state = KEY_RELEASED, int32_t mods = 0);
 
     void update_timestamp();
     
     void   set_timestamp(double time);
     double get_timestamp();
 
-    bool is_in_state(KeyState keyState, int32_t modState);
+    bool is_in_state(KeyState_t keyState, int32_t modState);
 
-    bool is_in_key_state(KeyState stateCheck);
+    bool is_in_key_state(KeyState_t stateCheck);
     bool is_in_mod_state(int32_t modState);
-    KeyState get_key_state();
-    KeyState get_mod_state();
+    KeyState_t get_key_state();
+    KeyState_t get_mod_state();
 };
 
 class InputManager

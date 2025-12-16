@@ -1,15 +1,16 @@
 #include "game_window.hpp"
 
 #include <iostream>
-
-#include "GLFW/glfw3.h"
 #include <memory>
-#include <stb/stb_image.h>
 
-#include "scene.hpp"
+#include <stb/stb_image.h>
+#include <GLFW/glfw3.h>
+
+#include "entity_manager.hpp"
 #include "input_manager.hpp"
 #include "shader.hpp"
-#include "components/transform.hpp"
+// #include "components/transform.hpp"
+
 
 GameWindow GameWindow::create(glm::vec2 size, const std::string& title)
 {
@@ -31,7 +32,7 @@ GameWindow GameWindow::create(glm::vec2 size, const std::string& title)
 
 	init_glad_if_not_init();
 
-    base.scene = std::make_unique<Scene>();
+    base.scene = std::make_unique<EntityManager>();
     base.inputManager = std::make_unique<InputManager>(InputManager::create(base.window));
 
 	return base;
@@ -84,8 +85,8 @@ void GameWindow::on_framebuffer_size_glfw(GLFWwindow* window, int32_t width, int
 
 void GameWindow::start_game_loop()
 {
-	EntityId entity = scene->new_entity();
-	Transform transform = scene->add_component<Transform>(entity);
+	// EntityId_t entity = scene->new_entity();
+	// Transform transform = scene->add_component<Transform>(entity);
 
 	int currentEntityIndex = 0;
 
@@ -134,7 +135,7 @@ GLFWwindow* GameWindow::get_window()
 {
     return window;
 }
-std::shared_ptr<Scene> GameWindow::get_scene()
+std::shared_ptr<EntityManager> GameWindow::get_scene()
 {
 	return scene;
 }

@@ -2,7 +2,7 @@
 
 #include "game_window.hpp"
 
-KeyStateInfo KeyStateInfo::create(KeyState state, int32_t mods)
+KeyStateInfo KeyStateInfo::create(KeyState_t state, int32_t mods)
 {
     KeyStateInfo base;
     base.keyState = state;
@@ -31,11 +31,11 @@ double KeyStateInfo::get_timestamp()
 }
 
 
-bool KeyStateInfo::is_in_state(KeyState stateCheck, int32_t mods)
+bool KeyStateInfo::is_in_state(KeyState_t stateCheck, int32_t mods)
 {
     return is_in_key_state(stateCheck) && is_in_mod_state(mods);
 }
-bool KeyStateInfo::is_in_key_state(KeyState stateCheck)
+bool KeyStateInfo::is_in_key_state(KeyState_t stateCheck)
 {
     return (this->keyState & stateCheck) == stateCheck;
 }
@@ -44,7 +44,7 @@ bool KeyStateInfo::is_in_mod_state(int32_t mods)
     return (this->modState & mods) == mods;
 }
 
-KeyState KeyStateInfo::get_key_state()
+KeyState_t KeyStateInfo::get_key_state()
 {
     return this->keyState;
 }
@@ -181,13 +181,13 @@ void InputManager::on_key_glfw(GLFWwindow* window, int32_t key, int32_t scancode
     // handle repeating on the "user" side and in text input later
     if (action != GLFW_PRESS && action != GLFW_RELEASE) return;
 
-    KeyState newState = action == GLFW_PRESS ? KEY_PRESSED : KEY_RELEASED;
+    KeyState_t newState = action == GLFW_PRESS ? KEY_PRESSED : KEY_RELEASED;
     KeyStateInfo keyStateInfo = KeyStateInfo::create(newState, mods);
     allKeyStates.insert_or_assign(key, keyStateInfo);
 }
 void InputManager::on_mouse_button_glfw(GLFWwindow* window, int32_t button, int32_t action, int32_t mods)
 {
-    KeyState newState = action == GLFW_PRESS ? KEY_PRESSED : KEY_RELEASED;
+    KeyState_t newState = action == GLFW_PRESS ? KEY_PRESSED : KEY_RELEASED;
     KeyStateInfo keyStateInfo = KeyStateInfo::create(newState, mods);
     allMouseButtonStates.insert_or_assign(button, keyStateInfo);
 }

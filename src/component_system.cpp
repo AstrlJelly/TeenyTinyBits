@@ -1,22 +1,14 @@
 #include "component_system.hpp"
 
 
-Entity::Entity(EntityId id, ComponentMask mask)
+
+ComponentManager::ComponentManager()
 {
-	this->id = id;
-	this->mask = mask;
+	componentPools = std::array<std::shared_ptr<IComponentPool>, MAX_COMPONENT_TYPES>();
 }
 
-EntityId Entity::get_id()
-{
-	return this->id;
-}
-ComponentMask Entity::get_mask()
-{
-	return this->mask;
-}
 
-void Entity::set_bit_in_mask(EntityInt position, bool value)
+ComponentMask_t ComponentManager::get_component_mask(EntityId_t entityId)
 {
-	this->mask.set(position, value);
+	return componentMasks.at(entityId);
 }

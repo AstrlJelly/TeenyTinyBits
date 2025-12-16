@@ -36,11 +36,11 @@ add_subdirectory("${PROJECT_INCLUDE_DIR}/GLFW")
 find_package(OpenGL REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC glfw OpenGL::GL)
 
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost REQUIRED)
-target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost Boost::headers)
+# set(Boost_USE_STATIC_LIBS OFF)
+# set(Boost_USE_MULTITHREADED ON)
+# set(Boost_USE_STATIC_RUNTIME OFF)
+# # find_package(Boost REQUIRED)
+# # target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost Boost::headers)
 
 
 target_include_directories(${PROJECT_NAME} PUBLIC

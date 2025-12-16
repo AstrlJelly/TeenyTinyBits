@@ -2,21 +2,16 @@
 
 #include <array>
 #include <bitset>
-#include <cstdint>
+#include <memory>
 #include <type_traits>
 
-#include <boost/preprocessor.hpp>
 
+#include "entity.hpp"
 
-// define EntityInt so it's obvious when a number or id is being used
-typedef int32_t EntityInt;
-typedef EntityInt EntityId;
+constexpr EntityInt_t MAX_COMPONENT_TYPES = 32;
 
-constexpr EntityInt ENTITY_START_CAPACITY = 0x0FFF;
-
-constexpr EntityInt MAX_COMPONENT_TYPES = 32;
 // can be replaced with `std::dynamic_bitset` if 'tis wished to be dynamic
-typedef std::bitset<MAX_COMPONENT_TYPES> ComponentMask;
+typedef std::bitset<MAX_COMPONENT_TYPES> ComponentMask_t;
 
 template<class T>
 concept ComponentData = requires
@@ -24,21 +19,6 @@ concept ComponentData = requires
     { T() };
     requires !std::is_arithmetic_v<T>;
     requires !std::is_pointer_v<T>;
-};
-
-struct Entity
-{
-private:
-    EntityId id;
-    ComponentMask mask;
-
-public:
-    Entity(EntityId id, ComponentMask mask);
-    
-    EntityId get_id();
-
-    ComponentMask get_mask();
-    void set_bit_in_mask(EntityInt position, bool value = true);
 };
 
 struct IComponentPool
@@ -50,8 +30,8 @@ template<ComponentData T>
 class ComponentPool : public IComponentPool
 {
 private:
-    // TODO: optimize with indexes so data can be cache hit (and for lower memory usage?)
-    // std::vector<EntityInt> indexes;
+    // TODO: optimize with indices so data can be cache hit (and for lower memory usage?)
+    std::array<EntityInt_t, ENTITY_START_CAPACITY> indices;
     std::array<T, ENTITY_START_CAPACITY> componentsData;
 
 public:
@@ -60,10 +40,31 @@ public:
     // for the risky boys and girls
     // inline void* at(EntityId index);
     
-    T& set(EntityId index);
-    T& at (EntityId index);
+    T& set(EntityId_t index);
+    T& at (EntityId_t index);
 
-    EntityInt get_size();
+    EntityInt_t get_size();
+};
+
+class ComponentManager
+{
+private:
+    std::array<ComponentMask_t, ENTITY_START_CAPACITY> componentMasks;
+    std::array<std::shared_ptr<IComponentPool>, MAX_COMPONENT_TYPES> componentPools;
+
+    static inline EntityInt_t s_componentTypeCounter = 0;
+public:
+    ComponentManager();
+
+    // will get the id associated with the type inputted
+    // stays consistent because of how static templates work
+    template<ComponentData T> static EntityInt_t get_component_id();
+
+    // i will do my best to not make this AWFULLY optimized like unity did
+    template<ComponentData T> T& get_component(EntityId_t entityId);
+    template<ComponentData T> T& add_component(EntityId_t id);
+
+    ComponentMask_t get_component_mask(EntityId_t entityId);
 };
 
 #include "component_system.hxx"

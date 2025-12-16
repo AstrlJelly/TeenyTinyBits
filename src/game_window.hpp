@@ -1,16 +1,13 @@
 #pragma once
 
-#include <glad/glad.h>
-#include "GLFW/glfw3.h"
-#include <GL/glext.h>
-
-// #include <ImGui/imgui.h>
-// #include <ImGui/backends/imgui_impl_glfw.h>
-// #include <ImGui/backends/imgui_impl_opengl3.h>
-#include <glm/glm/glm.hpp>
 #include <memory>
 
-#include "scene.hpp"
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <GL/glext.h>
+#include <glm/glm/glm.hpp>
+
+#include "entity_manager.hpp"
 #include "input_manager.hpp"
 
 #define TEMP_MAX_OBJECTS 0xFFFF
@@ -20,7 +17,7 @@ class GameWindow
 {
 private:    
     GLFWwindow* window;
-    std::shared_ptr<Scene> scene;
+    std::shared_ptr<EntityManager> scene;
     std::shared_ptr<InputManager> inputManager;
 
     double deltaTime;
@@ -47,7 +44,7 @@ public:
     void initialize_frame();
 
     GLFWwindow*                   get_window();
-    std::shared_ptr<Scene>        get_scene();
+    std::shared_ptr<EntityManager>        get_scene();
     std::shared_ptr<InputManager> get_input_manager();
 
     glm::vec2 get_window_size();
