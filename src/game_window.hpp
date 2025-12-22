@@ -17,8 +17,8 @@ class GameWindow
 {
 private:    
     GLFWwindow* window;
-    std::shared_ptr<EntityManager> scene;
-    std::shared_ptr<InputManager> inputManager;
+    std::unique_ptr<EntityManager> scene;
+    std::unique_ptr<InputManager> inputManager;
 
     double deltaTime;
     double lastFrameTime;

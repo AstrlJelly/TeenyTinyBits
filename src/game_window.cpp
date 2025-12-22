@@ -33,7 +33,7 @@ GameWindow GameWindow::create(glm::vec2 size, const std::string& title)
 	init_glad_if_not_init();
 
     base.scene = std::make_unique<EntityManager>();
-    base.inputManager = std::make_unique<InputManager>(InputManager::create(base.window));
+    base.inputManager = std::make_unique<InputManager>(base.window);
 
 	return base;
 }
