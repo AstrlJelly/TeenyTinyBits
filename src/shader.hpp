@@ -57,13 +57,13 @@ private:
     static void add_all_shader_include_strings();
     
 public:
-    static const inline fs::path shaderIncludePath = "shaders/include";
-  
-    // might be useful if shaders will be created outside of this class
-    // Shader(GLuint program);
-
+    Shader();
     // reads and compiles the shader
     static Shader create(std::initializer_list<ShaderInfo> shaderInfos);
+
+    static const inline fs::path shaderIncludePath = "shaders/include";
+  
+
 
     // use/activate the shader
     void use();

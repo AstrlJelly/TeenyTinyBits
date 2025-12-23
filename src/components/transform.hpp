@@ -1,11 +1,10 @@
 #pragma once
 
-#include "component_system.hpp"
 #include "glm/glm/glm.hpp" // IWYU pragma: keep, common header
 
+#include "components/component.hpp"
 
-struct Transform 
+struct Transform : Component
 {
     glm::vec3 position;
 };
-static_assert(ComponentData<Transform>);

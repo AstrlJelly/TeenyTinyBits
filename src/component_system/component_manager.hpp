@@ -6,6 +6,7 @@
 #include <type_traits>
 
 
+#include "components/component.hpp"
 #include "entity.hpp"
 
 constexpr EntityInt_t MAX_COMPONENT_TYPES = 32;
@@ -16,9 +17,10 @@ typedef std::bitset<MAX_COMPONENT_TYPES> ComponentMask_t;
 template<class T>
 concept ComponentData = requires
 {
-    { T() };
+    requires std::is_base_of_v<Component, T>;
     requires !std::is_arithmetic_v<T>;
     requires !std::is_pointer_v<T>;
+    { T() };
 };
 
 struct IComponentPool
@@ -55,6 +57,7 @@ private:
     static inline EntityInt_t s_componentTypeCounter = 0;
 public:
     ComponentManager();
+    static ComponentManager create();
 
     // will get the id associated with the type inputted
     // stays consistent because of how static templates work
@@ -67,4 +70,4 @@ public:
     ComponentMask_t get_component_mask(EntityId_t entityId);
 };
 
-#include "component_system.hxx"
+#include "component_manager.hxx"

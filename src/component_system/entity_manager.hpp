@@ -11,7 +11,8 @@ private:
     std::bitset<ENTITY_START_CAPACITY> entityUsedStates;
 
 public:
-    EntityManager create();
+    EntityManager();
+    static EntityManager create();
 
     EntityId_t new_entity();
 

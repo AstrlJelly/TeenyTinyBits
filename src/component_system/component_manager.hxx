@@ -1,5 +1,5 @@
 #pragma once
-#include "component_system.hpp"
+#include "component_manager.hpp"
 #include "entity.hpp"
 #include <cassert>
 

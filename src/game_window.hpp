@@ -7,8 +7,8 @@
 #include <GL/glext.h>
 #include <glm/glm/glm.hpp>
 
-#include "entity_manager.hpp"
 #include "input_manager.hpp"
+#include "component_system/scene.hpp"
 
 #define TEMP_MAX_OBJECTS 0xFFFF
 
@@ -17,8 +17,8 @@ class GameWindow
 {
 private:    
     GLFWwindow* window;
-    std::shared_ptr<EntityManager> scene;
-    std::shared_ptr<InputManager> inputManager;
+    std::unique_ptr<Scene> scene;
+    std::unique_ptr<InputManager> inputManager;
 
     double deltaTime;
     double lastFrameTime;
@@ -44,8 +44,8 @@ public:
     void initialize_frame();
 
     GLFWwindow*                   get_window();
-    std::shared_ptr<EntityManager>        get_scene();
-    std::shared_ptr<InputManager> get_input_manager();
+    std::unique_ptr<Scene>        get_scene();
+    std::unique_ptr<InputManager> get_input_manager();
 
     glm::vec2 get_window_size();
     glm::vec2 get_window_pos();
