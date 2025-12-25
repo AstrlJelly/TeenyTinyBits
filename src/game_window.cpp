@@ -6,9 +6,10 @@
 #include <stb/stb_image.h>
 #include <GLFW/glfw3.h>
 
+#include "entity_manager.hpp"
 #include "input_manager.hpp"
 #include "shader.hpp"
-#include "component_system/scene.hpp"
+// #include "components/transform.hpp"
 
 
 GameWindow GameWindow::create(glm::vec2 size, const std::string& title)
@@ -31,8 +32,8 @@ GameWindow GameWindow::create(glm::vec2 size, const std::string& title)
 
 	init_glad_if_not_init();
 
-    base.scene = std::make_unique<Scene>();
-    base.inputManager = std::make_unique<InputManager>(InputManager::create(base.window));
+    base.scene = std::make_unique<EntityManager>();
+    base.inputManager = std::make_unique<InputManager>(base.window);
 
 	return base;
 }
@@ -134,11 +135,11 @@ GLFWwindow* GameWindow::get_window()
 {
     return window;
 }
-std::unique_ptr<Scene> GameWindow::get_scene()
+std::shared_ptr<EntityManager> GameWindow::get_scene()
 {
 	return scene;
 }
-std::unique_ptr<InputManager> GameWindow::get_input_manager()
+std::shared_ptr<InputManager> GameWindow::get_input_manager()
 {
 	return inputManager;
 }
