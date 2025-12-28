@@ -7,20 +7,21 @@
 template<ComponentData T>
 ComponentPool<T>::ComponentPool()
 {
+	indices = std::array<EntityInt_t, ENTITY_START_CAPACITY>();
 	componentsData = std::array<T, ENTITY_START_CAPACITY>();
 }
 
 template<ComponentData T>
-T& ComponentPool<T>::set(EntityId_t index)
+T& ComponentPool<T>::set(EntityId_t idIndex)
 {
-	componentsData[index] = {};
-	return this->at(index);
+	componentsData[idIndex] = {};
+	return this->at(idIndex);
 }
 
 template<ComponentData T>
-T& ComponentPool<T>::at(EntityInt_t index)
+T& ComponentPool<T>::at(EntityId_t idIndex)
 {
-	return componentsData.at(index);
+	return componentsData.at(idIndex);
 }
 
 template<ComponentData T>
@@ -31,7 +32,7 @@ EntityInt_t ComponentPool<T>::get_size()
 
 
 template<ComponentData T>
-EntityInt_t ComponentManager::get_component_id()
+ComponentId_t ComponentManager::get_component_id()
 {
 	static int32_t s_componentId = s_componentTypeCounter++;
 	
@@ -51,7 +52,7 @@ T& ComponentManager::get_component(EntityId_t entityId)
 template<ComponentData T>
 T& ComponentManager::add_component(EntityId_t entityId)
 {
-    int componentId = get_component_id<T>();
+    ComponentId_t componentId = get_component_id<T>();
 
 	// the array should be sized appropriately on construction
 	// so, only necessary with dynamic sizing
@@ -63,14 +64,12 @@ T& ComponentManager::add_component(EntityId_t entityId)
 
 	if (componentPools.at(componentId) == nullptr)
 	{
-		componentPools[componentId] = std::make_shared<ComponentPool<T>>();
+		componentPools[componentId] = new ComponentPool<T>();
 	}
 
-	ComponentPool<T>* componentPool = static_cast<ComponentPool<T>*>(componentPools.at(componentId).get());
+	// HACK: find a better way to access the component pool list? (if there is a better way)
+	ComponentPool<T>* componentPool = static_cast<ComponentPool<T>*>(componentPools.at(componentId));
 
-	// Entity entity = allEntities.at(entityId);
-	// entity.set_bit_in_mask(componentId, true);
-	
 	componentMasks.at(entityId).set(componentId, true);
 
 	componentPool->set(entityId);

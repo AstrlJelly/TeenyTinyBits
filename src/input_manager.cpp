@@ -1,14 +1,13 @@
 #include "input_manager.hpp"
 
 #include "game_window.hpp"
+#include <memory>
 
-KeyStateInfo KeyStateInfo::create(KeyState_t state, int32_t mods)
+KeyStateInfo::KeyStateInfo(KeyState_t state, int32_t mods)
 {
-    KeyStateInfo base;
-    base.keyState = state;
-    base.modState = mods;
-    base.update_timestamp();
-    return base;
+    this->keyState = state;
+    this->modState = mods;
+    this->update_timestamp();
 }
 
 KeyStateInfo InputManager::operator[](int32_t key)
@@ -50,16 +49,15 @@ KeyState_t KeyStateInfo::get_key_state()
 }
 
 
-InputManager InputManager::create(GLFWwindow* window)
+InputManager::InputManager(GLFWwindow* window)
 {
-    InputManager base;
-    base.allKeyStates = {};
-    base.realTimeScrollDelta = {};
-    base.initialize_callbacks(window);
-    return base;
+    this->allKeyStates = {};
+    this->realTimeScrollDelta = {};
+
+    this->initialize_callbacks(window);
 }
 
-std::shared_ptr<InputManager> InputManager::get_input_manager(GLFWwindow* window)
+std::unique_ptr<InputManager>& InputManager::get_input_manager(GLFWwindow* window)
 {
 	GameWindow* gw = GameWindow::get_game_window(window);
 	return gw->get_input_manager();
@@ -156,22 +154,22 @@ void InputManager::initialize_frame(GLFWwindow* window, double deltaTime)
 
 void InputManager::on_key_glfw_callback(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods)
 {
-    std::shared_ptr<InputManager> inputManager = InputManager::get_input_manager(window);
+    std::unique_ptr<InputManager>& inputManager = InputManager::get_input_manager(window);
 	inputManager->on_key_glfw(window, key, scancode, action, mods);
 }
 void InputManager::on_mouse_button_glfw_callback(GLFWwindow *window, int32_t button, int32_t action, int32_t mods)
 {
-    std::shared_ptr<InputManager> inputManager = InputManager::get_input_manager(window);
+    std::unique_ptr<InputManager>& inputManager = InputManager::get_input_manager(window);
 	inputManager->on_mouse_button_glfw(window, button, action, mods);
 }
 void InputManager::on_scroll_glfw_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
-    std::shared_ptr<InputManager> inputManager = InputManager::get_input_manager(window);
+    std::unique_ptr<InputManager>& inputManager = InputManager::get_input_manager(window);
 	inputManager->on_scroll_glfw(window, xoffset, yoffset);
 }
 void InputManager::on_cursor_move_glfw_callback(GLFWwindow *window, double x, double y)
 {
-    std::shared_ptr<InputManager> inputManager = InputManager::get_input_manager(window);
+    std::unique_ptr<InputManager>& inputManager = InputManager::get_input_manager(window);
 	inputManager->on_cursor_move_glfw(window, x, y);
 }
 
@@ -182,13 +180,13 @@ void InputManager::on_key_glfw(GLFWwindow* window, int32_t key, int32_t scancode
     if (action != GLFW_PRESS && action != GLFW_RELEASE) return;
 
     KeyState_t newState = action == GLFW_PRESS ? KEY_PRESSED : KEY_RELEASED;
-    KeyStateInfo keyStateInfo = KeyStateInfo::create(newState, mods);
+    KeyStateInfo keyStateInfo = KeyStateInfo(newState, mods);
     allKeyStates.insert_or_assign(key, keyStateInfo);
 }
 void InputManager::on_mouse_button_glfw(GLFWwindow* window, int32_t button, int32_t action, int32_t mods)
 {
     KeyState_t newState = action == GLFW_PRESS ? KEY_PRESSED : KEY_RELEASED;
-    KeyStateInfo keyStateInfo = KeyStateInfo::create(newState, mods);
+    KeyStateInfo keyStateInfo = KeyStateInfo(newState, mods);
     allMouseButtonStates.insert_or_assign(button, keyStateInfo);
 }
 void InputManager::on_cursor_move_glfw(GLFWwindow* window, double x, double y)

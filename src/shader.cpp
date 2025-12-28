@@ -7,38 +7,40 @@
 #include "glad/glad.h"
 #include "glm/glm/gtc/type_ptr.hpp"
 
-ShaderInfo ShaderInfo::create(ShaderType type, std::string path)
+ShaderInfo::ShaderInfo(ShaderType type, std::string path)
 {
-    ShaderInfo base;
-    base.type = type;
-    base.path = path;
-    return base;
+    // ShaderInfo base = *this;
+    this->type = type;
+    this->path = path;
+    // *this = base;
 }
 
-Shader Shader::create(std::initializer_list<ShaderInfo> shaderInfos)
+Shader::Shader(std::initializer_list<ShaderInfo> shaderInfos)
 {
-    if (!s_initialized)
+    // this will only happen once, tell the compiler that this is verrry rare
+    // this is mostly to make me feel better about using this design pattern...
+    if (!s_initialized) [[ unlikely ]]
     {
         Shader::add_all_shader_include_strings();
 
         s_initialized = true;
     }
 
-    GLuint shaderIds[shaderInfos.size()];
-    for (int32_t i = 0; i < shaderInfos.size(); i++) {
-        // funny indexing
-        ShaderInfo shaderInfo = *(shaderInfos.begin() + i);
+    size_t shaderCount = shaderInfos.size();
+    GLuint shaderIds[shaderCount];
+    for (size_t i = 0; i < shaderCount; i++) {
+        ShaderInfo shaderInfo = shaderInfos.begin()[i];
         shaderIds[i] = compile_shader_from_path(shaderInfo.type, shaderInfo.path.c_str());
     }
 
     // shader Program
     GLuint programID = glCreateProgram();
-    for (int32_t i = 0; i < shaderInfos.size(); i++) {
+    for (int32_t i = 0; i < shaderCount; i++) {
         GLuint shaderId = shaderIds[i];
         glAttachShader(programID, shaderId);
     }
     glLinkProgram(programID);
-    
+   
     int32_t success;
     char infoLog[512];
     // print linking errors if any
@@ -49,38 +51,29 @@ Shader Shader::create(std::initializer_list<ShaderInfo> shaderInfos)
         std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
         exit(1);
     }
-    
+   
     // delete the shaders as they're linked into our program now and no longer necessary
-    for (int32_t i = 0; i < shaderInfos.size(); i++) {
+    for (int32_t i = 0; i < shaderCount; i++) {
         GLuint shaderId = shaderIds[i];
         glDeleteShader(shaderId);
     }
 
-    Shader base;
-    base.programID = programID;
-    base.initialize_uniforms();
-
-    return base;
+    this->programID = programID;
+    this->initialize_uniforms();
 }
 
-PipelineShader PipelineShader::create(const std::string& vertexPath, const std::string& fragmentPath)
-{
-    PipelineShader base;
-    base.pipelineShader = Shader::create({
-        ShaderInfo::create(ShaderType::Vertex, vertexPath),
-        ShaderInfo::create(ShaderType::Fragment, fragmentPath)
-    });
-    return base;
-}
+PipelineShader::PipelineShader(const std::string& vertexPath, const std::string& fragmentPath)
+    : pipelineShader({
+        ShaderInfo(ShaderType::VERTEX, vertexPath),
+        ShaderInfo(ShaderType::FRAGMENT, fragmentPath)
+    })
+{}
 
-ComputeShader ComputeShader::create(const std::string& computePath)
-{
-    ComputeShader base;
-    base.computeShader = Shader::create({
-        ShaderInfo::create(ShaderType::Compute, computePath)
-    });
-    return base;
-}
+ComputeShader::ComputeShader(const std::string& computePath) 
+    : computeShader({
+        ShaderInfo(ShaderType::COMPUTE, computePath)
+    })
+{}
 
 void ComputeShader::dispatch_indirect()
 {
@@ -100,7 +93,7 @@ GLuint Shader::compile_shader_from_path(ShaderType shaderType, const char* path)
     std::ifstream shaderFile;
     // ensure ifstream objects can throw exceptions:
     shaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    try 
+    try
     {
         // open files
         shaderFile.open(path);
@@ -136,19 +129,19 @@ GLuint Shader::compile_shader_from_path(ShaderType shaderType, const char* path)
         int32_t infoLogLength;
         glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
 
-        std::string infoLogStr;
+        std::string infoLog;
         if (infoLogLength)
         {
-            char infoLog[infoLogLength];
-            glGetShaderInfoLog(shaderID, infoLogLength, NULL, infoLog);
-            infoLogStr = std::string(infoLog);
+            char infoLogBuffer[infoLogLength];
+            glGetShaderInfoLog(shaderID, infoLogLength, NULL, infoLogBuffer);
+            infoLog = std::string(infoLogBuffer);
         }
         else
         {
-            infoLogStr = std::string("Info log was empty. Are you sure the shader was compiled?");
+            infoLog = std::string("Info log was empty. Are you sure the shader was compiled?");
         }
 
-        std::cerr << "ERROR::SHADER::" << Shader::get_shader_type_string(shaderType) << "::COMPILATION_FAILED : " << infoLogLength << " chars" << "\n" << infoLogStr << std::endl;
+        std::cerr << "ERROR::SHADER::" << Shader::get_shader_type_string(shaderType) << "::COMPILATION_FAILED : " << infoLogLength << " chars" << "\n" << infoLog << std::endl;
         exit(1);
     }
 
@@ -178,9 +171,9 @@ void Shader::initialize_uniforms()
     }
 }
 
-std::string Shader::get_shader_type_string(ShaderType shaderType)
+const std::string& Shader::get_shader_type_string(ShaderType shaderType)
 {
-    return "";
+    return Shader::shaderTypeStrings.at(static_cast<size_t>(shaderType));
 }
 
 void Shader::add_all_shader_include_strings()
@@ -206,8 +199,8 @@ void Shader::add_all_shader_include_strings()
 }
 
 
-void Shader::use() 
-{ 
+void Shader::use()
+{
     glUseProgram(programID);
 }
 
@@ -234,31 +227,31 @@ GLint Shader::get_uniform_location(const std::string &name) const
     }
 }
 
-void Shader::set_bool(const std::string &name, bool value) const
+void Shader::set_bool(const std::string &name, bool value)
 {
     GLint location = this->get_uniform_location(name);
     glUniform1i(location, static_cast<int32_t>(value));
 }
-void Shader::set_int(const std::string &name, int32_t value) const
+void Shader::set_int(const std::string &name, int32_t value)
 {
     GLint location = this->get_uniform_location(name);
     glUniform1i(location, value);
 }
-void Shader::set_float(const std::string &name, float value) const
+void Shader::set_float(const std::string &name, float value)
 {
     GLint location = this->get_uniform_location(name);
     glUniform1f(location, value);
 }
-void Shader::set_vec3(const std::string &name, double x, double y, double z) const
+void Shader::set_vec3(const std::string &name, double x, double y, double z)
 {
     this->set_vec3(name, glm::vec3(x, y, z));
 }
-void Shader::set_vec3(const std::string &name, glm::vec3 value) const
+void Shader::set_vec3(const std::string &name, glm::vec3 value)
 {
     GLint location = this->get_uniform_location(name);
     glUniform3fv(location, 1, glm::value_ptr(value));
 }
-void Shader::set_mat4(const std::string &name, glm::mat4 value) const
+void Shader::set_mat4(const std::string &name, glm::mat4 value)
 {
     GLint location = this->get_uniform_location(name);
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));

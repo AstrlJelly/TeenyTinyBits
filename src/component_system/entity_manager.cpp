@@ -6,11 +6,9 @@
 #include "entity.hpp"
 
 
-EntityManager EntityManager::create()
+EntityManager::EntityManager()
 {
-	EntityManager base{};
-	base.entityUsedStates = {};
-	return base;
+	this->entityUsedStates = {};
 }
 
 EntityId_t EntityManager::new_entity()

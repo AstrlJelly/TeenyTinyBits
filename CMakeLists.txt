@@ -7,13 +7,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(PROJECT_SCRIPTS_DIR "${PROJECT_SOURCE_DIR}/src")
 set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include")
 
-configure_file("${PROJECT_SCRIPTS_DIR}/constants.hpp.in" "${PROJECT_BINARY_DIR}/constants.hpp")
+# configure_file("${PROJECT_SCRIPTS_DIR}/constants.hpp.in" "${PROJECT_BINARY_DIR}/constants.hpp")
 
 
 file(GLOB_RECURSE PROJECT_SCRIPTS
     "${PROJECT_SCRIPTS_DIR}/*.cpp"
 )
-message(NOTICE "${PROJECT_SCRIPTS}")
 
 file(GLOB IMGUI_SCRIPTS
     "${PROJECT_INCLUDE_DIR}/ImGui/*.cpp"

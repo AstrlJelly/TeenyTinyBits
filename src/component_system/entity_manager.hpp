@@ -12,7 +12,6 @@ private:
 
 public:
     EntityManager();
-    static EntityManager create();
 
     EntityId_t new_entity();
 

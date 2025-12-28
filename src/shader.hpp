@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <map>
 #include <string>
 #include <filesystem>
@@ -10,13 +11,18 @@
 
 namespace fs = std::filesystem;
 
+#define SHADER_TYPES \
+    X(COMPUTE)   \
+    X(GEOMETRY)  \
+    X(FRAGMENT)  \
+    X(VERTEX)    \
+
+#define X(type) type = GL_ ## type ## _SHADER,
 enum class ShaderType
 {
-    Compute  = GL_COMPUTE_SHADER,
-    Geometry = GL_GEOMETRY_SHADER,
-    Fragment = GL_FRAGMENT_SHADER,
-    Vertex   = GL_VERTEX_SHADER,
+    SHADER_TYPES
 };
+#undef X
 
 
 struct ShaderInfo
@@ -24,8 +30,7 @@ struct ShaderInfo
     ShaderType type;
     std::string path;
 
-    ShaderInfo() {};
-    static ShaderInfo create(ShaderType type, std::string path);
+    ShaderInfo(ShaderType type, std::string path);
 };
 
 class Shader
@@ -38,8 +43,8 @@ private:
     std::map<std::string, GLint> uniformLocations;
 
     /**
-     * @brief Initializes a map of uniform names to their internal locations, for optimization purposes
-     * 
+     * @brief Initializes a map of uniform names to their internal locations,
+     *        to reduce observation of OpenGL state
      */
     void initialize_uniforms();
 
@@ -47,8 +52,8 @@ private:
 
     /**
     * @brief Compiles shader code at a given path.
-    * 
-    * @param shaderType Must be GL_***_SHADER
+    * s
+    * @param shaderType Any shader type
     * @param path Path to shader file
     * @note Variadic functions cannot include non-trivial types (such as const std::string&), so this uses a C string
     * @return GLuint Location of compiled shader
@@ -57,13 +62,18 @@ private:
     static void add_all_shader_include_strings();
     
 public:
-    Shader();
-    // reads and compiles the shader
-    static Shader create(std::initializer_list<ShaderInfo> shaderInfos);
-
     static const inline fs::path shaderIncludePath = "shaders/include";
-  
 
+    // stringize the types as an array
+    #define X(type) std::string(#type),
+    static const inline std::array shaderTypeStrings{ SHADER_TYPES };
+    #undef X
+  
+    // might be useful if shaders will be created outside of this class
+    // Shader(GLuint program);
+
+    // reads and compiles the shader
+    Shader(std::initializer_list<ShaderInfo> shaderInfos);
 
     // use/activate the shader
     void use();
@@ -78,12 +88,12 @@ public:
      */
     GLint get_uniform_location(const std::string& name) const;
 
-    void set_bool (const std::string& name, bool value)                   const;
-    void set_int  (const std::string& name, int32_t value)                const;
-    void set_float(const std::string& name, float value)                  const;
-    void set_vec3 (const std::string& name, glm::vec3 value)              const;
-    void set_vec3 (const std::string& name, double x, double y, double z) const;
-    void set_mat4 (const std::string& name, glm::mat4 value)              const;
+    void set_bool (const std::string& name, bool value);
+    void set_int  (const std::string& name, int32_t value);
+    void set_float(const std::string& name, float value);
+    void set_vec3 (const std::string& name, glm::vec3 value);
+    void set_vec3 (const std::string& name, double x, double y, double z);
+    void set_mat4 (const std::string& name, glm::mat4 value);
 
 
     /**
@@ -97,10 +107,10 @@ public:
     /**
      * @brief Get the name of the inputted type of shader
      * 
-     * @param shaderType
-     * @return std::string
+     * @param shaderType Any shader type
+     * @return std::string ShaderType stringized at preprocessing time
      */
-    static std::string get_shader_type_string(ShaderType shaderType);
+    static const std::string& get_shader_type_string(ShaderType shaderType);
 };
 
 class PipelineShader
@@ -109,8 +119,9 @@ private:
     Shader pipelineShader;
 
 public:
-    PipelineShader() {};
-    static PipelineShader create(const std::string& vertexPath, const std::string& fragmentPath);
+    PipelineShader(const std::string& vertexPath, const std::string& fragmentPath);
+
+    Shader get_shader() { return pipelineShader; };
 };
 
 class ComputeShader
@@ -119,8 +130,9 @@ private:
     Shader computeShader;
 
 public:
-    ComputeShader() {};
-    static ComputeShader create(const std::string& computePath);
+    ComputeShader(const std::string& computePath);
+
+    Shader get_shader() { return computeShader; };
 
     void dispatch_indirect();
     void dispatch(int32_t x = 1, int32_t y = 1, int32_t z = 1);

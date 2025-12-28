@@ -10,7 +10,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/glm/glm.hpp" // IWYU pragma: keep, common header
 
-typedef uint32_t KeyState_t;
+using KeyState_t = uint32_t;
 constexpr KeyState_t KEY_RELEASED = 1 << 0;
 constexpr KeyState_t KEY_PRESSED  = 1 << 1;
 
@@ -22,8 +22,7 @@ private:
     double timestamp;
 
 public:
-    KeyStateInfo() {};
-    static KeyStateInfo create(KeyState_t state = KEY_RELEASED, int32_t mods = 0);
+    KeyStateInfo(KeyState_t state = KEY_RELEASED, int32_t mods = 0);
 
     void update_timestamp();
     
@@ -63,9 +62,8 @@ private:
     static void on_scroll_glfw_callback      (GLFWwindow* window, double xoffset, double yoffset);
 
 public:
-    InputManager() {};
-    static InputManager create(GLFWwindow* window);
-    static std::shared_ptr<InputManager> get_input_manager(GLFWwindow* window);
+    InputManager(GLFWwindow* window);
+    static std::unique_ptr<InputManager>& get_input_manager(GLFWwindow* window);
 
     KeyStateInfo operator[](int32_t key);
 

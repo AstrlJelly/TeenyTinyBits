@@ -6,36 +6,34 @@
 #include <stb/stb_image.h>
 #include <GLFW/glfw3.h>
 
-#include "entity_manager.hpp"
 #include "input_manager.hpp"
 #include "shader.hpp"
-// #include "components/transform.hpp"
+#include "component_system/component_manager.hpp"
+#include "component_system/entity_manager.hpp"
+#include "components/transform.hpp"
 
 
-GameWindow GameWindow::create(glm::vec2 size, const std::string& title)
+GameWindow::GameWindow(glm::vec2 size, const std::string& title)
 {
 	init_glfw_if_not_init();
-	GameWindow base;
 
-	base.window = glfwCreateWindow(size.x, size.y, title.c_str(), NULL, NULL);
-	if (base.window == nullptr)
+	this->window = glfwCreateWindow(size.x, size.y, title.c_str(), NULL, NULL);
+	if (this->window == nullptr)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
         throw;
 	}
-	glfwMakeContextCurrent(base.window);
-	glfwSetWindowUserPointer(base.window, &base);
+	glfwMakeContextCurrent(this->window);
+	glfwSetWindowUserPointer(this->window, this);
 	glfwSwapInterval(1);
 
-	glfwSetFramebufferSizeCallback(base.window, on_framebuffer_size_glfw);
+	glfwSetFramebufferSizeCallback(this->window, on_framebuffer_size_glfw);
 
 	init_glad_if_not_init();
 
-    base.scene = std::make_unique<EntityManager>();
-    base.inputManager = std::make_unique<InputManager>(base.window);
-
-	return base;
+    this->scene = std::make_unique<Scene>();
+    this->inputManager = std::make_unique<InputManager>(this->window);
 }
 
 void GameWindow::init_glfw_if_not_init()
@@ -85,12 +83,12 @@ void GameWindow::on_framebuffer_size_glfw(GLFWwindow* window, int32_t width, int
 
 void GameWindow::start_game_loop()
 {
-	// EntityId_t entity = scene->new_entity();
-	// Transform transform = scene->add_component<Transform>(entity);
+	EntityId_t entity = scene->new_entity();
+	Transform transform = scene->add_component<Transform>(entity);
 
 	int currentEntityIndex = 0;
 
-	PipelineShader shader = PipelineShader::create("./shaders/shader.vert", "./shaders/shader.frag");
+	PipelineShader shader = PipelineShader("./shaders/shader.vert", "./shaders/shader.frag");
 	// shader
 	
 	while (!glfwWindowShouldClose(window))
@@ -135,13 +133,22 @@ GLFWwindow* GameWindow::get_window()
 {
     return window;
 }
-std::shared_ptr<EntityManager> GameWindow::get_scene()
+std::unique_ptr<InputManager>& GameWindow::get_input_manager()
+{
+	return inputManager;
+}
+
+std::unique_ptr<Scene>& GameWindow::get_scene()
 {
 	return scene;
 }
-std::shared_ptr<InputManager> GameWindow::get_input_manager()
+EntityManager& GameWindow::get_entity_manager()
 {
-	return inputManager;
+	return scene->get_entity_manager();
+}
+ComponentManager& GameWindow::get_component_manager()
+{
+	return scene->get_component_manager();
 }
 
 

@@ -8,6 +8,8 @@
 #include <glm/glm/glm.hpp>
 
 #include "input_manager.hpp"
+#include "component_system/component_manager.hpp"
+#include "component_system/entity_manager.hpp"
 #include "component_system/scene.hpp"
 
 #define TEMP_MAX_OBJECTS 0xFFFF
@@ -29,11 +31,10 @@ private:
     static void on_framebuffer_size_glfw(GLFWwindow* window, int32_t width, int32_t height);
     
 public:
-    GameWindow() {};
-    static GameWindow create(glm::vec2 size, const std::string& title);
+    GameWindow(glm::vec2 size, const std::string& title);
 
     /**
-     * @brief Statically get the game window object from a `GLFWwindow`
+     * @brief Get a pointer to a `GameWindow` from a `GLFWwindow`
      * 
      * @param window A GLFWwindow created from `GameWindow`
      * @return The pointer in `GLFWwindow` static casted to `GameWindow*`
@@ -43,9 +44,12 @@ public:
     void start_game_loop();
     void initialize_frame();
 
-    GLFWwindow*                   get_window();
-    std::unique_ptr<Scene>        get_scene();
-    std::unique_ptr<InputManager> get_input_manager();
+    GLFWwindow*                    get_window();
+    std::unique_ptr<InputManager>& get_input_manager();
+
+    std::unique_ptr<Scene>& get_scene();             
+    EntityManager&          get_entity_manager();    
+    ComponentManager&       get_component_manager(); 
 
     glm::vec2 get_window_size();
     glm::vec2 get_window_pos();
