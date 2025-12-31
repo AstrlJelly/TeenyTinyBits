@@ -6,6 +6,7 @@
 #include <stb/stb_image.h>
 #include <GLFW/glfw3.h>
 
+#include "components/name.hpp"
 #include "input_manager.hpp"
 #include "shader.hpp"
 #include "component_system/component_manager.hpp"
@@ -84,7 +85,13 @@ void GameWindow::on_framebuffer_size_glfw(GLFWwindow* window, int32_t width, int
 void GameWindow::start_game_loop()
 {
 	EntityId_t entity = scene->new_entity();
-	Transform transform = scene->add_component<Transform>(entity);
+	Transform& transform = scene->add_component<Transform>(entity);
+	Name& name = scene->add_component<Name>(entity);
+	name.name = "test";
+
+	std::cout << scene->get_component_manager().has_components<Transform, Name>(entity) << std::endl;
+	Name& name2 = scene->get_component<Name>(entity);
+	std::cout << name2.name << std::endl;
 
 	int currentEntityIndex = 0;
 

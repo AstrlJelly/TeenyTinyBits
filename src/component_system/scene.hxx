@@ -11,11 +11,11 @@ ComponentId_t Scene::get_component_id()
 template<ComponentData T>
 T& Scene::get_component(EntityId_t entityId)
 {
-    return componentManager.get_component<T>(entityId);
+    return this->componentManager.get_component<T>(entityId);
 }
 
 template<ComponentData T>
 T& Scene::add_component(EntityId_t entityId)
 {
-    return componentManager.add_component<T>(entityId);
+    return this->componentManager.add_component<T>(entityId);
 }

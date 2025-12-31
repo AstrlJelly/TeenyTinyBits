@@ -6,23 +6,23 @@
 
 Scene::Scene()
 {
-    entityManager = EntityManager();
-    componentManager = ComponentManager();
+    this->entityManager = EntityManager();
+    this->componentManager = ComponentManager();
 }
 
 
 EntityManager& Scene::get_entity_manager()
 {
-    return entityManager;
+    return this->entityManager;
 }
 
 EntityId_t Scene::new_entity()
 {
-    return entityManager.new_entity();
+    return this->entityManager.new_entity();
 }
 
 
 ComponentManager& Scene::get_component_manager()
 {
-    return componentManager;
+    return this->componentManager;
 }

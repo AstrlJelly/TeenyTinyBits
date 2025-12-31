@@ -1,6 +1,25 @@
 #include "component_manager.hpp"
 
 
+ComponentMask::ComponentMask()
+{
+	this->mask = {};
+}
+
+ComponentMask::ComponentBitMask_t ComponentMask::get_mask()
+{
+	return this->mask;
+}
+
+bool ComponentMask::at(ComponentInt_t index)
+{
+	return this->mask.test(index);
+}
+void ComponentMask::set(ComponentInt_t index, bool value)
+{
+	this->mask.set(index, value);
+}
+
 
 ComponentManager::ComponentManager()
 {
@@ -15,7 +34,7 @@ ComponentManager::~ComponentManager()
 	}
 }
 
-ComponentMask_t ComponentManager::get_component_mask(EntityId_t entityId)
+ComponentMask ComponentManager::get_component_mask(EntityId_t entityId)
 {
 	return componentMasks.at(entityId);
 }

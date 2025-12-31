@@ -31,6 +31,33 @@ EntityInt_t ComponentPool<T>::get_size()
 }
 
 
+template<ComponentData... TArgs>
+ComponentMask ComponentMask::from_components()
+{
+	ComponentMask base{};
+	(base.set<TArgs>(true), ...);
+	return base;
+}
+
+
+template<ComponentData T>
+bool ComponentMask::at()
+{
+	return this->at(ComponentManager::get_component_id<T>());
+}
+template<ComponentData T>
+void ComponentMask::set(bool value)
+{
+	this->set(ComponentManager::get_component_id<T>(), value);
+}
+
+
+template<ComponentData T>
+ComponentPool<T>& ComponentManager::get_component_pool()
+{
+	return static_cast<ComponentPool<T>&>(componentPools.at(ComponentManager::get_component_id<T>()));
+}
+
 template<ComponentData T>
 ComponentId_t ComponentManager::get_component_id()
 {
@@ -44,34 +71,31 @@ ComponentId_t ComponentManager::get_component_id()
 template<ComponentData T>
 T& ComponentManager::get_component(EntityId_t entityId)
 {
-	T componentId = get_component_id<T>();
-	ComponentPool<T> componentPool = componentPools[componentId];
-	return componentPool.at(entityId);
+	return this->get_component_pool<T>().at(entityId);
 }
 
 template<ComponentData T>
 T& ComponentManager::add_component(EntityId_t entityId)
 {
-    ComponentId_t componentId = get_component_id<T>();
-
-	// the array should be sized appropriately on construction
-	// so, only necessary with dynamic sizing
-	// if (allComponentPools.size() <= componentId)
-	// {
-	// 	allComponentPools.resize(allComponentPools.capacity() * 2);
-	// }
-
+    ComponentId_t componentId = ComponentManager::get_component_id<T>();
 
 	if (componentPools.at(componentId) == nullptr)
 	{
 		componentPools[componentId] = new ComponentPool<T>();
 	}
 
-	// HACK: find a better way to access the component pool list? (if there is a better way)
-	ComponentPool<T>* componentPool = static_cast<ComponentPool<T>*>(componentPools.at(componentId));
+	ComponentPool<T>& componentPool = this->get_component_pool<T>();
 
 	componentMasks.at(entityId).set(componentId, true);
 
-	componentPool->set(entityId);
-	return componentPool->at(entityId);
+	componentPool.set(entityId);
+	return componentPool.at(entityId);
+}
+
+template<ComponentData... TArgs>
+bool ComponentManager::has_components(EntityId_t entityId)
+{
+	ComponentMask entityComponents = this->get_component_mask(entityId);
+	ComponentMask componentMask = ComponentMask::from_components<TArgs...>();
+	return (entityComponents.get_mask() & componentMask.get_mask()) == componentMask.get_mask();
 }
