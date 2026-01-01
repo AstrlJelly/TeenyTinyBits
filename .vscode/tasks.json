@@ -10,7 +10,7 @@
         {
             "label": "Build (Debug)",
             "type": "shell",
-            "command": "/usr/bin/cmake --build ${workspaceFolder}/build",
+            "command": "mkdir -p ${workspaceFolder}/build && /usr/bin/cmake --build ${workspaceFolder}/build",
             "problemMatcher": []
         }
     ],
