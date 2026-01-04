@@ -103,6 +103,7 @@ private:
 
     template<ComponentData T>
     ComponentPool<T>& get_component_pool();
+    IComponentPool& get_component_pool(ComponentId_t componentId);
 public:
     ComponentManager();
     ~ComponentManager();

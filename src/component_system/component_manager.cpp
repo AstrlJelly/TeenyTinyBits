@@ -21,6 +21,11 @@ void ComponentMask::set(ComponentInt_t index, bool value)
 }
 
 
+IComponentPool& ComponentManager::get_component_pool(ComponentId_t componentId)
+{
+	return *componentPools.at(componentId);
+}
+
 ComponentManager::ComponentManager()
 {
 	componentPools = std::array<IComponentPool*, MAX_COMPONENT_TYPES>();

@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <map>
 
-#include <glad/glad.h>
 #include <memory>
 #include "GLFW/glfw3.h"
 

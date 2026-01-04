@@ -55,7 +55,8 @@ void ComponentMask::set(bool value)
 template<ComponentData T>
 ComponentPool<T>& ComponentManager::get_component_pool()
 {
-	return static_cast<ComponentPool<T>&>(componentPools.at(ComponentManager::get_component_id<T>()));
+	IComponentPool& componentPool = ComponentManager::get_component_pool(ComponentManager::get_component_id<T>());
+	return static_cast<ComponentPool<T>&>(componentPool);
 }
 
 template<ComponentData T>

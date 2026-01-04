@@ -6,6 +6,8 @@
 
 #include "game_window.hpp"
 
+#include "glad/glad.c"
+
 int32_t main(void)
 {
 	// std::cout << "Version : " << TeenyTinyBits_VERSION_MAJOR << '.'
