@@ -8,20 +8,25 @@
 
 EntityManager::EntityManager()
 {
-	this->entityUsedStates = {};
 }
 
+// TODO: optimize this somehow, without increasing memory usage too much
 EntityId_t EntityManager::new_entity()
 {
-	// TODO: optimize this somehow, without increasing memory usage too much
-	for (EntityInt_t i = 0; i < this->entityUsedStates.size(); i++)
+	for (EntityId_t i = 0; i < this->entityUsedStates.size(); i++)
 	{
-		if (!is_entity_used(i))
+		if (!this->is_entity_used(i))
 		{
+			this->entityUsedStates.set(i, true);
     		return i;
 		}
 	}
 	throw std::out_of_range(std::format("EntityManager ran out of entity ids. Was {} not enough?", this->entityUsedStates.size()));
+}
+
+void EntityManager::destroy_entity(EntityId_t entityId)
+{
+	this->entityUsedStates.set(entityId, false);
 }
 
 inline bool EntityManager::is_entity_used(EntityId_t entityId)

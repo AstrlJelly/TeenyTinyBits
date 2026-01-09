@@ -7,18 +7,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(PROJECT_SCRIPTS_DIR "${PROJECT_SOURCE_DIR}/src/")
 set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")
 
-# configure_file("${PROJECT_SCRIPTS_DIR}/constants.hpp.in" "${PROJECT_BINARY_DIR}/constants.hpp")
+configure_file("${PROJECT_SCRIPTS_DIR}/constants.hpp.in" "${PROJECT_BINARY_DIR}/constants.hpp")
 
 
 file(GLOB_RECURSE PROJECT_SCRIPTS
     "${PROJECT_SCRIPTS_DIR}/*.cpp"
 )
 
+
+set(IMGUI_DIR "${PROJECT_SOURCE_DIR}/ImGui/")
 file(GLOB IMGUI_SCRIPTS
-    "${PROJECT_INCLUDE_DIR}/ImGui/*.cpp"
-    "${PROJECT_INCLUDE_DIR}/ImGui/backends/imgui_impl_glfw.cpp"
-    "${PROJECT_INCLUDE_DIR}/ImGui/backends/imgui_impl_opengl3.cpp"
-    # "${PROJECT_INCLUDE_DIR}/ImGui/backends/*.cpp"
+    "${IMGUI_DIR}/*.cpp"
+    "${IMGUI_DIR}/backends/imgui_impl_glfw.cpp"
+    "${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp"
 )
 
 add_executable(${PROJECT_NAME}

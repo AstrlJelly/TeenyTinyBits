@@ -1,26 +1,39 @@
-// #include <iostream>
-
-// need to put this in the cpp file
+#include "components/game_window.hpp"
+#include "ecs/entity.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
-#include "game_window.hpp"
+#include "GLFW/glfw3.h"
 
-#include "glad/glad.c"
+#include "ecs/entity_component_system.hpp"
+#include "systems/window_system.hpp"
+
+
 
 int32_t main(void)
 {
-	// std::cout << "Version : " << TeenyTinyBits_VERSION_MAJOR << '.'
-	// 					      << TeenyTinyBits_VERSION_MINOR << '.'
-	// 					      << TeenyTinyBits_VERSION_PATCH << '\n';
+	// ~500 kb is fine for the 1 mb stack, but i wanna futureproof
+	ECSManager ecs = *new ECSManager();
 
+	// initialize systems
+	WindowSystem& windowSystem = ecs.register_system<WindowSystem>();
 
-	GameWindow gw = GameWindow(glm::vec2(1920, 1080), "TeenyTinyBits");
+	// system init functions
 
-	gw.start_game_loop();
+	// create desired entities + components
+	EntityId_t windowId = ecs.new_entity();
+	GameWindow& gameWindow = ecs.add_component<GameWindow>(windowId);
+
+	while (ecs.is_running())
+	{
+		windowSystem.update(ecs);
+
+		windowSystem.render(ecs);
+	}
+
+	delete &ecs;
 
 	glfwTerminate();
-	// ImGui::DestroyContext();
 
 	return 0;
 }

@@ -1,7 +1,6 @@
 #include "input_manager.hpp"
 
 #include "game_window.hpp"
-#include <memory>
 
 KeyStateInfo::KeyStateInfo(KeyState_t state, int32_t mods)
 {
@@ -57,11 +56,11 @@ InputManager::InputManager(GLFWwindow* window)
     this->initialize_callbacks(window);
 }
 
-std::unique_ptr<InputManager>& InputManager::get_input_manager(GLFWwindow* window)
-{
-	GameWindow* gw = GameWindow::get_game_window(window);
-	return gw->get_input_manager();
-}
+// std::unique_ptr<InputManager>& InputManager::get_input_manager(GLFWwindow* window)
+// {
+// 	GameWindow* gw = GameWindow::get_game_window(window);
+// 	return gw->get_input_manager();
+// }
 
 void InputManager::initialize_callbacks(GLFWwindow* window)
 {
@@ -154,23 +153,23 @@ void InputManager::initialize_frame(GLFWwindow* window, double deltaTime)
 
 void InputManager::on_key_glfw_callback(GLFWwindow *window, int32_t key, int32_t scancode, int32_t action, int32_t mods)
 {
-    std::unique_ptr<InputManager>& inputManager = InputManager::get_input_manager(window);
-	inputManager->on_key_glfw(window, key, scancode, action, mods);
+    // std::unique_ptr<InputManager>& inputManager = InputManager::get_input_manager(window);
+	// inputManager->on_key_glfw(window, key, scancode, action, mods);
 }
 void InputManager::on_mouse_button_glfw_callback(GLFWwindow *window, int32_t button, int32_t action, int32_t mods)
 {
-    std::unique_ptr<InputManager>& inputManager = InputManager::get_input_manager(window);
-	inputManager->on_mouse_button_glfw(window, button, action, mods);
+    // std::unique_ptr<InputManager>& inputManager = InputManager::get_input_manager(window);
+	// inputManager->on_mouse_button_glfw(window, button, action, mods);
 }
 void InputManager::on_scroll_glfw_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
-    std::unique_ptr<InputManager>& inputManager = InputManager::get_input_manager(window);
-	inputManager->on_scroll_glfw(window, xoffset, yoffset);
+    // std::unique_ptr<InputManager>& inputManager = InputManager::get_input_manager(window);
+	// inputManager->on_scroll_glfw(window, xoffset, yoffset);
 }
 void InputManager::on_cursor_move_glfw_callback(GLFWwindow *window, double x, double y)
 {
-    std::unique_ptr<InputManager>& inputManager = InputManager::get_input_manager(window);
-	inputManager->on_cursor_move_glfw(window, x, y);
+    // std::unique_ptr<InputManager>& inputManager = InputManager::get_input_manager(window);
+	// inputManager->on_cursor_move_glfw(window, x, y);
 }
 
 

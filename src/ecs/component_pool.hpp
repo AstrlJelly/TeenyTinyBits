@@ -1,0 +1,42 @@
+#pragma once
+
+#include <array>
+
+#include "ecs/component.hpp"
+#include "ecs/entity.hpp"
+
+
+struct IComponentPool
+{
+    virtual ~IComponentPool() {};
+};
+
+template<ComponentData T>
+class ComponentPool : public IComponentPool
+{
+private:
+    // TODO: optimize with indices so data can be cache hit (and for lower memory usage?)
+    std::array<EntityInt_t, ENTITY_START_CAPACITY> indices;
+    std::array<T, ENTITY_START_CAPACITY> componentsData;
+
+public:
+    ComponentPool<T>()
+    {
+        indices = std::array<EntityInt_t, ENTITY_START_CAPACITY>();
+        componentsData = std::array<T, ENTITY_START_CAPACITY>();
+    }
+
+    void set(EntityId_t idIndex)
+    {
+        componentsData[idIndex] = T();
+    }
+    [[nodiscard]] T& at(EntityId_t idIndex)
+    {
+        return componentsData.at(idIndex);
+    }
+
+    [[nodiscard]] EntityInt_t get_size()
+    {
+	    return componentsData.size();
+    }
+};

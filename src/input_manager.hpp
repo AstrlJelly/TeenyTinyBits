@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <map>
 
-#include <memory>
 #include "GLFW/glfw3.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -62,7 +61,7 @@ private:
 
 public:
     InputManager(GLFWwindow* window);
-    static std::unique_ptr<InputManager>& get_input_manager(GLFWwindow* window);
+    // static std::unique_ptr<InputManager>& get_input_manager(GLFWwindow* window);
 
     KeyStateInfo operator[](int32_t key);
 

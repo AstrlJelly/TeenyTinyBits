@@ -1,6 +1,6 @@
 #pragma once
 
-#include "components/component.hpp"
+#include "ecs/component.hpp"
 
 struct Name : Component
 {

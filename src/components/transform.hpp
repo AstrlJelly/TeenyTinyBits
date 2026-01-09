@@ -2,7 +2,7 @@
 
 #include "glm/glm/glm.hpp" // IWYU pragma: keep, common header
 
-#include "components/component.hpp"
+#include "ecs/component.hpp"
 
 struct Transform : Component
 {
