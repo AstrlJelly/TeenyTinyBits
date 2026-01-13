@@ -14,7 +14,7 @@ struct GameWindow : Component
     double lastFrameTime;
 
     inline constexpr static glm::vec2 DEFAULT_WINDOW_SIZE = glm::vec2(800, 640);
-    inline constexpr static const char* DEFAULT_WINDOW_TITLE = "TeenyTinyBits";
+    inline constexpr static const char* DEFAULT_WINDOW_TITLE = "Teeny";
 
-    void initialize();
+    void init();
 };

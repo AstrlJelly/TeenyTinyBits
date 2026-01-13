@@ -1,4 +1,6 @@
 #include "entity_component_system.hpp"
+#include "entity.hpp"
+
 
 bool ECSManager::is_running()
 {

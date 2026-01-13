@@ -1,4 +1,4 @@
-#include "components/game_window.hpp"
+#include "ecs/components/game_window.hpp"
 #include "ecs/entity.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -6,7 +6,7 @@
 #include "GLFW/glfw3.h"
 
 #include "ecs/entity_component_system.hpp"
-#include "systems/window_system.hpp"
+#include "ecs/systems/window_system.hpp"
 
 
 
@@ -22,7 +22,9 @@ int32_t main(void)
 
 	// create desired entities + components
 	EntityId_t windowId = ecs.new_entity();
-	GameWindow& gameWindow = ecs.add_component<GameWindow>(windowId);
+	ecs.add_component<GameWindow>(windowId);
+	EntityId_t windowId2 = ecs.new_entity();
+	ecs.add_component<GameWindow>(windowId2);
 
 	while (ecs.is_running())
 	{

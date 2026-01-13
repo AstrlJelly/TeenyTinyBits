@@ -9,7 +9,7 @@
             "request": "launch",
             "name": "Debug",
             "preLaunchTask": "Build (Debug)",
-            "program": "${workspaceFolder}/build/${workspaceFolderBasename}",
+            "program": "${workspaceFolder}/build/teenydemo",
             "cwd": "${workspaceFolder}/"
         }
     ]

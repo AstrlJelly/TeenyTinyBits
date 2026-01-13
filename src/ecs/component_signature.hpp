@@ -2,7 +2,7 @@
 
 #include <bitset>
 
-#include "ecs/component.hpp"
+#include "component.hpp"
 
 class ComponentSignature
 {
@@ -17,9 +17,9 @@ public:
     // constexpr ComponentSignature();
 
     template<ComponentData... TArgs>
-    [[nodiscard]] constexpr inline static ComponentSignature from_components()
+    [[nodiscard]] inline constexpr static ComponentSignature from_components()
     {
-        constexpr ComponentSignature base;
+        ComponentSignature base;
         (base.set<TArgs>(true), ...);
         return base;
     }
@@ -52,7 +52,7 @@ public:
     }
 
     template<ComponentData T>
-    constexpr inline void set(bool value)
+    constexpr inline void set(bool value = true)
     {
         this->set(get_component_id<T>(), value);
     }

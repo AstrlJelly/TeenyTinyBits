@@ -4,27 +4,33 @@
 #include <set>
 #include <type_traits>
 
-#include "ecs/component.hpp"
-#include "ecs/entity.hpp"
+#include "component.hpp"
+#include "component_signature.hpp"
+#include "entity.hpp"
 
 
 using SystemInt_t = uint32_t;
 using SystemId_t = SystemInt_t;
 constexpr SystemInt_t MAX_SYSTEM_TYPES = 0x80;
 
-template<ComponentData... ComponentSignatureTArgs>
 struct System
 {
+    ComponentSignature matchingSignature;
     // TODO: check if an array is more efficient (memory vs cache basically)
     std::set<EntityId_t> matchingEntities;
+
+    
 };
+
+#define SET_COMPONENT_SIGNATURE(args...) ComponentSignature matchingSignature = \
+    ComponentSignature::from_components<args>()
 
 
 template<class T>
 concept SystemType = requires {
-    std::is_same_v   <System<>, T>;
-    std::is_base_of_v<System<>, T>;
-    sizeof(System<>) == sizeof(T);
+    std::is_same_v<System, T> ||
+        std::is_base_of_v<System, T>;
+    sizeof(System) == sizeof(T);
 };
 
 

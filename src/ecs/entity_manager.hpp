@@ -20,6 +20,8 @@ public:
     EntityId_t new_entity();
     void destroy_entity(EntityId_t entityId);
 
-    [[nodiscard]] inline bool is_entity_used(EntityId_t entityId);
+    void entity_signature_change(EntityId_t entityId);
+
+    [[nodiscard]] bool is_entity_used(EntityId_t entityId);
 };
 

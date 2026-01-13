@@ -1,4 +1,4 @@
-#include "components/game_window.hpp"
+#include "game_window.hpp"
 #include "GLFW/glfw3.h"
 #include <cstdint>
 #include <iostream>
@@ -43,9 +43,11 @@ void on_framebuffer_size_glfw(GLFWwindow* window, int32_t width, int32_t height)
     glViewport(0, 0, width, height);
 }
 
-void GameWindow::initialize()
+void GameWindow::init()
 {
-	if (this->window != nullptr)
+	// premature optimization? maybe.
+	// is it still unlikely if you use it right? yesss... 
+	if (this->window != nullptr) [[unlikely]]
 	{
 		std::cerr << "Window already initialized.\n";
 		return;

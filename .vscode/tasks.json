@@ -2,9 +2,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "CMake (Debug)",
+            "label": "Clean",
             "type": "shell",
-            "command": "/usr/bin/cmake -S ${workspaceFolder} -B ${workspaceFolder}/build -D CMAKE_BUILD_TYPE=Debug",
+            "command": "rm -r ${workspaceFolder}/build ${workspaceFolder}/.cache",
             "problemMatcher": []
         },
         {

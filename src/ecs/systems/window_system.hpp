@@ -1,0 +1,17 @@
+#pragma once
+
+#include "ecs/component_signature.hpp"
+#include "ecs/entity_component_system.hpp"
+#include "ecs/system.hpp"
+
+#include "ecs/components/game_window.hpp"
+#include "ecs/components/transform.hpp"
+
+
+struct WindowSystem : System
+{
+    SET_COMPONENT_SIGNATURE(GameWindow);
+
+    void update(ECSManager& ecs);
+    void render(ECSManager& ecs);
+};

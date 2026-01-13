@@ -29,7 +29,7 @@ void EntityManager::destroy_entity(EntityId_t entityId)
 	this->entityUsedStates.set(entityId, false);
 }
 
-inline bool EntityManager::is_entity_used(EntityId_t entityId)
+bool EntityManager::is_entity_used(EntityId_t entityId)
 {
 	return this->entityUsedStates.test(entityId);
 }

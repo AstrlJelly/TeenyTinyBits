@@ -2,8 +2,8 @@
 
 #include <array>
 
-#include "ecs/component.hpp"
-#include "ecs/entity.hpp"
+#include "component.hpp"
+#include "entity.hpp"
 
 
 struct IComponentPool

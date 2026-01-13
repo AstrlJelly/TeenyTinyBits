@@ -2,10 +2,10 @@
 
 #include <array>
 
-#include "ecs/component_pool.hpp"
-#include "ecs/component_signature.hpp"
-#include "ecs/entity.hpp"
-#include "ecs/component.hpp"
+#include "component_pool.hpp"
+#include "component_signature.hpp"
+#include "entity.hpp"
+#include "component.hpp"
 
 
 class ComponentManager
@@ -32,7 +32,7 @@ public:
     /**
      * @brief Get the component from inputted `entityId`
      * 
-     * @tparam T Component 
+     * @tparam T Component
      * @param entityId 
      * @return T&
      */
@@ -54,7 +54,35 @@ public:
         ComponentPool<T>& componentPool = this->get_component_pool<T>();
 
         ComponentSignature& componentSignature = componentSignatures.at(entityId);
-        componentSignature.set<T>(true);
+        componentSignature.set(entityId, true);
+
+        componentPool.set(entityId);
+        return componentPool.at(entityId);
+    }
+    template<ComponentData T>
+    [[nodiscard]] T& get_or_add_component(EntityId_t entityId)
+    {
+        if (!has_components<T>(entityId))
+        {
+            return add_component<T>(entityId);
+        }
+        
+        return this->get_component_pool<T>().at(entityId);
+    }
+    template<ComponentData T>
+    void remove_component(EntityId_t entityId)
+    {
+        ComponentId_t componentId = get_component_id<T>();
+
+        if (componentPools.at(componentId) == nullptr)
+        {
+            
+        }
+
+        ComponentPool<T>& componentPool = this->get_component_pool<T>();
+
+        ComponentSignature& componentSignature = componentSignatures.at(entityId);
+        componentSignature.set(entityId, true);
 
         componentPool.set(entityId);
         return componentPool.at(entityId);
@@ -68,10 +96,10 @@ public:
      * @return bool True if entity contains all components
      */
     template<ComponentData... TArgs>
-    [[nodiscard]] bool has_components(EntityId_t entityId)
+    [[nodiscard]] constexpr bool has_components(EntityId_t entityId)
     {
         ComponentSignature entityComponents = this->get_component_signature(entityId);
-        constexpr ComponentSignature componentSignature = ComponentSignature::from_components<TArgs...>();
+        ComponentSignature componentSignature = ComponentSignature::from_components<TArgs...>();
         return (entityComponents.get_mask() & componentSignature.get_mask()) == componentSignature.get_mask();
     }
 };

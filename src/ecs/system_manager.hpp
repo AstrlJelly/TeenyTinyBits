@@ -4,15 +4,18 @@
 #include <bitset>
 #include <print>
 
-#include "ecs/system.hpp"
+#include "component_signature.hpp"
+#include "system.hpp"
 
 class SystemManager
 {
 private:
     std::bitset<MAX_SYSTEM_TYPES> systemsRegisteredState;
-    std::array<System<>, MAX_SYSTEM_TYPES> registeredSystems;
+    std::array<System, MAX_SYSTEM_TYPES> registeredSystems;
 
 public:
+    void entity_signature_changed(EntityId_t entityId, ComponentSignature signature);
+
     template<SystemType T>
     T& register_system()
     {
@@ -22,6 +25,11 @@ public:
         {
             std::println("The system \"{}\" was already initialized.", typeid(T).name());
             std::println("Make sure to use SystemManager::get_registered_system() for existing systems!");
+        }
+        else
+        {
+            SystemId_t systemId = get_system_id<T>();
+            this->systemsRegisteredState.set(systemId);
         }
         
         return registeredSystem;
@@ -38,9 +46,8 @@ public:
     [[nodiscard]] T& get_registered_system()
     {
         SystemId_t systemId = get_system_id<T>();
-        assert(systemId < registeredSystems.size());
 
-        // HACK (possibly): two systems are basically the same, data-wise
-        return reinterpret_cast<T&>(registeredSystems.at(systemId));
+        return static_cast<T&>(this->get_registered_system(systemId));
     }
+    [[nodiscard]] System& get_registered_system(SystemId_t systemId);
 };

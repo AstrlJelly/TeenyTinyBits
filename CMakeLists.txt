@@ -1,48 +1,38 @@
 cmake_minimum_required(VERSION 3.31)
 
-project(TeenyTinyBits VERSION 0.2.1)
+project(teeny VERSION 0.0.0)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(PROJECT_SCRIPTS_DIR "${PROJECT_SOURCE_DIR}/src/")
-set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")
+set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include")
+set(PROJECT_SCRIPTS_DIR "${PROJECT_SOURCE_DIR}/src")
 
-configure_file("${PROJECT_SCRIPTS_DIR}/constants.hpp.in" "${PROJECT_BINARY_DIR}/constants.hpp")
-
-
-file(GLOB_RECURSE PROJECT_SCRIPTS
-    "${PROJECT_SCRIPTS_DIR}/*.cpp"
-)
+file(GLOB_RECURSE PROJECT_SCRIPTS "${PROJECT_SCRIPTS_DIR}/*")
 
 
-set(IMGUI_DIR "${PROJECT_SOURCE_DIR}/ImGui/")
+add_library(${PROJECT_NAME} STATIC ${PROJECT_SCRIPTS})
+
+add_subdirectory("${PROJECT_INCLUDE_DIR}/glm")
+add_subdirectory("${PROJECT_INCLUDE_DIR}/GLFW")
+find_package(OpenGL REQUIRED)
+
+set(IMGUI_DIR "${PROJECT_INCLUDE_DIR}/ImGui")
 file(GLOB IMGUI_SCRIPTS
     "${IMGUI_DIR}/*.cpp"
     "${IMGUI_DIR}/backends/imgui_impl_glfw.cpp"
     "${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp"
 )
+add_library(ImGui STATIC ${IMGUI_SCRIPTS})
+target_include_directories(ImGui PUBLIC "${PROJECT_INCLUDE_DIR}")
 
-add_executable(${PROJECT_NAME}
-    "${PROJECT_SCRIPTS}"
-    "${IMGUI_SCRIPTS}"
-    
-    # glad
-    "${PROJECT_INCLUDE_DIR}/glad/glad.c"
-)
+add_library(glad STATIC "${PROJECT_INCLUDE_DIR}/glad/glad.c")
+target_include_directories(glad PUBLIC "${PROJECT_INCLUDE_DIR}")
 
-
-add_subdirectory("${PROJECT_INCLUDE_DIR}/glm")
-add_subdirectory("${PROJECT_INCLUDE_DIR}/GLFW")
-find_package(OpenGL REQUIRED)
-target_link_libraries(${PROJECT_NAME} PUBLIC glfw OpenGL::GL)
-
-# set(Boost_USE_STATIC_LIBS OFF)
-# set(Boost_USE_MULTITHREADED ON)
-# set(Boost_USE_STATIC_RUNTIME OFF)
-# # find_package(Boost REQUIRED)
-# # target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost Boost::headers)
-
+target_link_libraries(${PROJECT_NAME} PUBLIC
+    glfw OpenGL::GL ImGui glad)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     "${PROJECT_SCRIPTS_DIR}" "${PROJECT_INCLUDE_DIR}" "${PROJECT_BINARY_DIR}")
-                           
+
+add_executable(teenydemo "${PROJECT_SCRIPTS_DIR}/main.cpp")
+target_link_libraries(teenydemo ${PROJECT_NAME})
