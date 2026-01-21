@@ -9,17 +9,11 @@ using ComponentInt_t = uint32_t;
 using ComponentId_t = ComponentInt_t;
 constexpr ComponentInt_t MAX_COMPONENT_TYPES = 0x80;
 
+
 class Component{};
 
 template<class T>
-concept ComponentData = requires
-{
-    // std::***_v is short for std::***::value
-    requires std::is_base_of_v<Component, T>;
-    requires !std::is_arithmetic_v<T>;
-    requires !std::is_pointer_v<T>;
-    { T() };
-};
+concept ComponentData = std::is_base_of_v<Component, T>;
 
 /**
   * @brief Get the id associated with the `Component` `T`

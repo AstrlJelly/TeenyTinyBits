@@ -12,19 +12,20 @@
 
 int32_t main(void)
 {
-	// ~500 kb is fine for the 1 mb stack, but i wanna futureproof
-	ECSManager ecs = *new ECSManager();
+	// last i checked, the ecs manager is ~537 kb
+	// much too big for the heap!
+	ECSManager& ecs = *new ECSManager();
 
 	// initialize systems
 	WindowSystem& windowSystem = ecs.register_system<WindowSystem>();
 
-	// system init functions
+	// system init functions(?)
 
 	// create desired entities + components
 	EntityId_t windowId = ecs.new_entity();
-	ecs.add_component<GameWindow>(windowId);
-	EntityId_t windowId2 = ecs.new_entity();
-	ecs.add_component<GameWindow>(windowId2);
+	GameWindow& gameWindow = ecs.add_component<GameWindow>(windowId);
+	// EntityId_t windowId2 = ecs.new_entity();
+	// ecs.add_component<GameWindow>(windowId2);
 
 	while (ecs.is_running())
 	{

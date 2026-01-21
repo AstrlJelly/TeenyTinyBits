@@ -7,6 +7,7 @@
 #include "component.hpp"
 #include "entity.hpp"
 
+
 class ECSManager
 {
 private:
@@ -21,9 +22,12 @@ public:
 
 
     // entity manager
+
     EntityId_t new_entity()
     {
-        return this->entityManager.new_entity();
+        EntityId_t entityId = this->entityManager.new_entity();
+
+        return entityId;
     }
     void destroy_entity(EntityId_t entityId)
     {
@@ -55,25 +59,34 @@ public:
     {
         return this->componentManager.get_component<T>(entityId);
     }
+    DEFINE_PLURAL_COMPONENT_FUNC_RETURN(get_component, (EntityId_t entityId), (entityId))
+    
     template<ComponentData T>
-    T& add_component(EntityId_t entityId)
+    T& add_component(EntityId_t entityId, T component = T())
     {
-        auto& result = this->componentManager.add_component<T>(entityId);
+        auto& result = this->componentManager.add_component<T>(entityId, component);
         this->systemManager.entity_signature_changed(entityId, get_component_signature(entityId));
         return result;
     }
+    DEFINE_PLURAL_COMPONENT_FUNC_RETURN(
+        add_component, (EntityId_t entityId, TArgs... components), (entityId, components...))
+
     template<ComponentData T>
-    [[nodiscard]] T& get_or_add_component(EntityId_t entityId)
+    [[nodiscard]] T& get_or_add_component(EntityId_t entityId, T component = T())
     {
-        return this->componentManager.get_or_add_component<T>(entityId);
+        return this->componentManager.get_or_add_component<T>(entityId, component);
     }
+    DEFINE_PLURAL_COMPONENT_FUNC_RETURN(
+        get_or_add_component, (EntityId_t entityId, TArgs... components), (entityId, components...))
+
     template<ComponentData T>
-    T& remove_component(EntityId_t entityId)
+    void remove_component(EntityId_t entityId)
     {
-        auto result = this->componentManager.remove_component<T>(entityId);
+        this->componentManager.remove_component<T>(entityId);
         this->systemManager.entity_signature_changed(entityId, get_component_signature(entityId));
-        return result;
     }
+    DEFINE_PLURAL_COMPONENT_FUNC_VOID(
+        remove_component, (EntityId_t entityId), (entityId))
 
     /**
      * @brief Template function to check for 0 or more components

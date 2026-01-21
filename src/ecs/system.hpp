@@ -4,7 +4,6 @@
 #include <set>
 #include <type_traits>
 
-#include "component.hpp"
 #include "component_signature.hpp"
 #include "entity.hpp"
 
@@ -19,7 +18,10 @@ struct System
     // TODO: check if an array is more efficient (memory vs cache basically)
     std::set<EntityId_t> matchingEntities;
 
-    
+    EntityInt_t get_entity_count()
+    {
+        return matchingEntities.size();
+    }
 };
 
 #define SET_COMPONENT_SIGNATURE(args...) ComponentSignature matchingSignature = \

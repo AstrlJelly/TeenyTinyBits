@@ -26,9 +26,9 @@ public:
         componentsData = std::array<T, ENTITY_START_CAPACITY>();
     }
 
-    void set(EntityId_t idIndex)
+    void set(EntityId_t idIndex, T value)
     {
-        componentsData[idIndex] = T();
+        componentsData[idIndex] = value;
     }
     [[nodiscard]] T& at(EntityId_t idIndex)
     {

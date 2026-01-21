@@ -16,6 +16,7 @@ void WindowSystem::update(ECSManager& ecs)
     {
         GameWindow& window = ecs.get_component<GameWindow>(entityId);
         Transform& transform = ecs.get_or_add_component<Transform>(entityId);
+
         if (window.window == nullptr)
         {
             window.init();
@@ -34,9 +35,8 @@ void WindowSystem::render(ECSManager& ecs)
         GameWindow& window = ecs.get_component<GameWindow>(entityId);
 	    glfwMakeContextCurrent(window.window);
 
-        double time = glfwGetTime();
-        double sinResult = sin(time) / 2 + 0.25;
-        glClearColor(sinResult, 0.3f, 0.3f, 1.0f);
+        glm::vec3 clear = window.clearColor;
+        glClearColor(clear.r, clear.g, clear.b, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glfwSwapBuffers(window.window);

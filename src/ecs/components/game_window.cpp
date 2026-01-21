@@ -1,7 +1,10 @@
 #include "game_window.hpp"
-#include "GLFW/glfw3.h"
+
 #include <cstdint>
-#include <iostream>
+
+#include "GLFW/glfw3.h"
+
+#include "print.hpp"
 
 
 void init_glfw_if_not_init()
@@ -13,7 +16,7 @@ void init_glfw_if_not_init()
 		int32_t result = glfwInit();
 		if (!result)
 		{
-			std::cerr << "Failed to initialized GLFW" << std::endl;
+			t_print(Severity::FATAL, "Failed to initialize GLFW");
 			exit(1);
 		}
 		
@@ -30,7 +33,7 @@ void init_glad_if_not_init()
 		int32_t result = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		if (!result)
 		{
-			std::cerr << "Failed to initialize GLAD" << std::endl;
+			t_print(Severity::FATAL, "Failed to initialize GLAD");
 			exit(1);
 		}
 
@@ -49,7 +52,7 @@ void GameWindow::init()
 	// is it still unlikely if you use it right? yesss... 
 	if (this->window != nullptr) [[unlikely]]
 	{
-		std::cerr << "Window already initialized.\n";
+		t_print(Severity::ERROR, "Window already initialized.");
 		return;
 	}
 
@@ -62,7 +65,7 @@ void GameWindow::init()
 	this->window = glfwCreateWindow(DEFAULT_WINDOW_SIZE.x, DEFAULT_WINDOW_SIZE.y, DEFAULT_WINDOW_TITLE, nullptr, nullptr);
 	if (this->window == nullptr)
 	{
-		std::cout << "Failed to create GLFW window" << std::endl;
+		t_print(Severity::FATAL, "Failed to create GLFW window");
 		delete this;
         throw;
 	}
