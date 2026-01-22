@@ -8,7 +8,7 @@
 #include "ecs/entity_component_system.hpp"
 #include "ecs/systems/window_system.hpp"
 
-
+using namespace teeny;
 
 int32_t main(void)
 {

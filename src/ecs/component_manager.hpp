@@ -18,110 +18,113 @@
 #define DEFINE_PLURAL_COMPONENT_FUNC_VOID(funcName, defArgs, callArgs)\
     DEFINE_PLURAL_COMPONENT_FUNC(void, funcName, defArgs, callArgs)
 
-class ComponentManager
+namespace teeny
 {
-private:
-    std::array<ComponentSignature, ENTITY_START_CAPACITY> componentSignatures;
-    // unfortunately, the component pool must be a pointer
-    // components are of various sizes therefore pools are too
-    std::array<IComponentPool*, MAX_COMPONENT_TYPES> componentPools;
-
-    template<ComponentData T>
-    [[nodiscard]] ComponentPool<T>& get_component_pool()
+    class ComponentManager
     {
-        IComponentPool& componentPool = this->get_component_pool(get_component_id<T>());
-        return static_cast<ComponentPool<T>&>(componentPool);
-    }
-    [[nodiscard]] IComponentPool& get_component_pool(ComponentId_t componentId);
+    private:
+        std::array<ComponentSignature, ENTITY_START_CAPACITY> componentSignatures;
+        // unfortunately, the component pool must be a pointer
+        // components are of various sizes therefore pools are too
+        std::array<IComponentPool*, MAX_COMPONENT_TYPES> componentPools;
     
-public:
-    ComponentManager();
-    ~ComponentManager();
-
-    [[nodiscard]] ComponentSignature get_component_signature(EntityId_t entityId);
-
-    /**
-     * @brief Get the component from inputted `entityId`
-     * 
-     * @tparam T Component
-     * @param entityId 
-     * @return T&
-     */
-    template<ComponentData T>
-    [[nodiscard]] T& get_component(EntityId_t entityId)
-    {
-        return this->get_component_pool<T>().at(entityId);
-    }
-    DEFINE_PLURAL_COMPONENT_FUNC_RETURN(get_component, (EntityId_t entityId), (entityId))
-
-    template<ComponentData T>
-    T& add_component(EntityId_t entityId, T component = T())
-    {
-        ComponentId_t componentId = get_component_id<T>();
-
-        if (componentPools.at(componentId) == nullptr)
+        template<ComponentData T>
+        [[nodiscard]] ComponentPool<T>& get_component_pool()
         {
-            componentPools[componentId] = new ComponentPool<T>();
+            IComponentPool& componentPool = this->get_component_pool(get_component_id<T>());
+            return static_cast<ComponentPool<T>&>(componentPool);
         }
-
-        ComponentPool<T>& componentPool = this->get_component_pool<T>();
-
-        ComponentSignature& componentSignature = componentSignatures.at(entityId);
-        componentSignature.set(componentId, true);
-
-        componentPool.set(entityId, component);
-        return componentPool.at(entityId);
-    }
-    DEFINE_PLURAL_COMPONENT_FUNC_RETURN(
-        add_component, (EntityId_t entityId, TArgs... components), (entityId, components...))
-
-    template<ComponentData T>
-    [[nodiscard]] T& get_or_add_component(EntityId_t entityId, T component = T())
-    {
-        if (!has_components<T>(entityId))
-        {
-            return add_component<T>(entityId, component);
-        }
+        [[nodiscard]] IComponentPool& get_component_pool(ComponentId_t componentId);
         
-        return this->get_component_pool<T>().at(entityId);
-    }
-    DEFINE_PLURAL_COMPONENT_FUNC_RETURN(
-        get_or_add_component, (EntityId_t entityId, TArgs... components), (entityId, components...))
-
-    // TODO:     this
-    template<ComponentData T>
-    void remove_component(EntityId_t entityId)
-    {
-        ComponentId_t componentId = get_component_id<T>();
-
-        if (componentPools.at(componentId) == nullptr)
+    public:
+        ComponentManager();
+        ~ComponentManager();
+    
+        [[nodiscard]] ComponentSignature get_component_signature(EntityId_t entityId);
+    
+        /**
+         * @brief Get the component from inputted `entityId`
+         * 
+         * @tparam T Component
+         * @param entityId 
+         * @return T&
+         */
+        template<ComponentData T>
+        [[nodiscard]] T& get_component(EntityId_t entityId)
         {
-            
+            return this->get_component_pool<T>().at(entityId);
         }
-
-        ComponentPool<T>& componentPool = this->get_component_pool<T>();
-
-        ComponentSignature& componentSignature = componentSignatures.at(entityId);
-        componentSignature.set(entityId, true);
-
-        componentPool.set(entityId);
-        return componentPool.at(entityId);
-    }
-    DEFINE_PLURAL_COMPONENT_FUNC_VOID(
-        remove_component, (EntityId_t entityId), (entityId))
-
-    /**
-     * @brief Template function to check for 0 or more components
-     * 
-     * @tparam TArgs Component types to check against
-     * @param entityId The entity id to check for
-     * @return bool True if entity contains all components
-     */
-    template<ComponentData... TArgs>
-    [[nodiscard]] constexpr bool has_components(EntityId_t entityId)
-    {
-        ComponentSignature entityComponents = this->get_component_signature(entityId);
-        ComponentSignature componentSignature = ComponentSignature::from_components<TArgs...>();
-        return (entityComponents.get_mask() & componentSignature.get_mask()) == componentSignature.get_mask();
-    }
-};
+        DEFINE_PLURAL_COMPONENT_FUNC_RETURN(get_component, (EntityId_t entityId), (entityId))
+    
+        template<ComponentData T>
+        T& add_component(EntityId_t entityId, T component = T())
+        {
+            ComponentId_t componentId = get_component_id<T>();
+    
+            if (componentPools.at(componentId) == nullptr)
+            {
+                componentPools[componentId] = new ComponentPool<T>();
+            }
+    
+            ComponentPool<T>& componentPool = this->get_component_pool<T>();
+    
+            ComponentSignature& componentSignature = componentSignatures.at(entityId);
+            componentSignature.set(componentId, true);
+    
+            componentPool.set(entityId, component);
+            return componentPool.at(entityId);
+        }
+        DEFINE_PLURAL_COMPONENT_FUNC_RETURN(
+            add_component, (EntityId_t entityId, TArgs... components), (entityId, components...))
+    
+        template<ComponentData T>
+        [[nodiscard]] T& get_or_add_component(EntityId_t entityId, T component = T())
+        {
+            if (!has_components<T>(entityId))
+            {
+                return add_component<T>(entityId, component);
+            }
+            
+            return this->get_component_pool<T>().at(entityId);
+        }
+        DEFINE_PLURAL_COMPONENT_FUNC_RETURN(
+            get_or_add_component, (EntityId_t entityId, TArgs... components), (entityId, components...))
+    
+        // TODO:     this
+        template<ComponentData T>
+        void remove_component(EntityId_t entityId)
+        {
+            ComponentId_t componentId = get_component_id<T>();
+    
+            if (componentPools.at(componentId) == nullptr)
+            {
+                
+            }
+    
+            ComponentPool<T>& componentPool = this->get_component_pool<T>();
+    
+            ComponentSignature& componentSignature = componentSignatures.at(entityId);
+            componentSignature.set(entityId, true);
+    
+            componentPool.set(entityId);
+            return componentPool.at(entityId);
+        }
+        DEFINE_PLURAL_COMPONENT_FUNC_VOID(
+            remove_component, (EntityId_t entityId), (entityId))
+    
+        /**
+         * @brief Template function to check for 0 or more components
+         * 
+         * @tparam TArgs Component types to check against
+         * @param entityId The entity id to check for
+         * @return bool True if entity contains all components
+         */
+        template<ComponentData... TArgs>
+        [[nodiscard]] constexpr bool has_components(EntityId_t entityId)
+        {
+            ComponentSignature entityComponents = this->get_component_signature(entityId);
+            ComponentSignature componentSignature = ComponentSignature::from_components<TArgs...>();
+            return (entityComponents.get_mask() & componentSignature.get_mask()) == componentSignature.get_mask();
+        }
+    };
+}

@@ -16,7 +16,7 @@ void init_glfw_if_not_init()
 		int32_t result = glfwInit();
 		if (!result)
 		{
-			t_print(Severity::FATAL, "Failed to initialize GLFW");
+			teeny::println(teeny::Severity::FATAL, "Failed to initialize GLFW");
 			exit(1);
 		}
 		
@@ -33,7 +33,7 @@ void init_glad_if_not_init()
 		int32_t result = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		if (!result)
 		{
-			t_print(Severity::FATAL, "Failed to initialize GLAD");
+			teeny::println(teeny::Severity::FATAL, "Failed to initialize GLAD");
 			exit(1);
 		}
 
@@ -46,39 +46,42 @@ void on_framebuffer_size_glfw(GLFWwindow* window, int32_t width, int32_t height)
     glViewport(0, 0, width, height);
 }
 
-void GameWindow::init()
+namespace teeny
 {
-	// premature optimization? maybe.
-	// is it still unlikely if you use it right? yesss... 
-	if (this->window != nullptr) [[unlikely]]
+	void GameWindow::init()
 	{
-		t_print(Severity::ERROR, "Window already initialized.");
-		return;
+		// premature optimization? maybe.
+		// is it still unlikely if you use it right? yesss... 
+		if (this->window != nullptr) [[unlikely]]
+		{
+			teeny::println(teeny::Severity::ERROR, "Window already initialized.");
+			return;
+		}
+	
+		init_glfw_if_not_init();
+	
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	
+		this->window = glfwCreateWindow(DEFAULT_WINDOW_SIZE.x, DEFAULT_WINDOW_SIZE.y, DEFAULT_WINDOW_TITLE, nullptr, nullptr);
+		if (this->window == nullptr)
+		{
+			teeny::println(teeny::Severity::FATAL, "Failed to create GLFW window");
+			delete this;
+			throw;
+		}
+		glfwMakeContextCurrent(this->window);
+	
+		// wait until glfwMakeContextCurrent to init glad
+		init_glad_if_not_init();
+	
+		// could have something more useful here, the user pointer is very powerful
+		glfwSetWindowUserPointer(this->window, this);
+		glfwSwapInterval(1);
+	
+		glfwSetFramebufferSizeCallback(this->window, on_framebuffer_size_glfw);
+	
+		glEnable(GL_DEPTH_TEST);
 	}
-
-	init_glfw_if_not_init();
-
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	this->window = glfwCreateWindow(DEFAULT_WINDOW_SIZE.x, DEFAULT_WINDOW_SIZE.y, DEFAULT_WINDOW_TITLE, nullptr, nullptr);
-	if (this->window == nullptr)
-	{
-		t_print(Severity::FATAL, "Failed to create GLFW window");
-		delete this;
-        throw;
-	}
-	glfwMakeContextCurrent(this->window);
-
-	// wait until glfwMakeContextCurrent to init glad
-	init_glad_if_not_init();
-
-	// could have something more useful here, the user pointer is very powerful
-	glfwSetWindowUserPointer(this->window, this);
-	glfwSwapInterval(1);
-
-	glfwSetFramebufferSizeCallback(this->window, on_framebuffer_size_glfw);
-
-	glEnable(GL_DEPTH_TEST);
 }

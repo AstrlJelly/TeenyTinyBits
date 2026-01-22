@@ -23,7 +23,7 @@
 // expands macro before stringizing
 #define _STRINGIZE_HELPER(m) #m
 #define STRINGIZE(m) _STRINGIZE_HELPER(m)
-#define EXPAND(m) m
+
 #define _ANSI_JOIN_SEQ_HELPER(major, minor) major##minor
 #define ANSI_JOIN_SEQ(major, minor) _ANSI_JOIN_SEQ_HELPER(major, minor)
 
@@ -31,40 +31,49 @@
 
 #define ANSI_FG(colorMinor) ANSI_JOIN_SEQ(ANSI_FG_MAJOR, colorMinor)
 
-#define ANSI_RESET ANSI_STRINGIZE(ANSI_RESET_MINOR)
+#define ANSI_RESET_STR ANSI_STRINGIZE(ANSI_RESET_MINOR)
 
 
-enum class Severity
+namespace teeny
 {
-    INFO, WARNING, ERROR, FATAL
-};
+    enum class Severity
+    {
+        INFO, WARNING, ERROR, FATAL
+    };
 
-template<typename T>
-concept Printable = requires (T t) { std::cout << t; };
+    template<typename T>
+    concept Printable = requires (T t) { std::string(t); };
 
-template<Printable... TArgs>
-inline void t_print(const TArgs&... args)
-{
-    std::cout << (std::string(args) + ...) << ANSI_STRINGIZE(ANSI_RESET_MINOR) << std::endl;
-}
-
-template<Printable... TArgs>
-inline void t_print(Severity severity, const TArgs&... args)
-{
-    std::string severityLog = "";
-    switch (severity) {
-        case Severity::WARNING:
-            severityLog = ANSI_STRINGIZE(ANSI_FG(ANSI_YELLOW_MINOR)) "[WARNING] ";
-            break;
-        case Severity::ERROR:
-            severityLog = ANSI_STRINGIZE(ANSI_FG(ANSI_RED_MINOR)) "[ERROR] ";
-            break;
-        case Severity::FATAL:
-            severityLog = ANSI_STRINGIZE(ANSI_FG(ANSI_RED_MINOR)) "[[FATAL]] ";
-            break;
-        case Severity::INFO:
-        default:
-            break;
+    template<Printable... TArgs>
+    inline void println(const TArgs&... args)
+    {
+        std::cout << (std::string(args) + ...) << ANSI_STRINGIZE(ANSI_RESET_MINOR) << std::endl;
     }
-    t_print(severityLog, args...);
+
+    template<Printable... TArgs>
+    inline void println(Severity severity, const TArgs&... args)
+    {
+        std::string severityLog = "";
+        switch (severity) {
+            case Severity::WARNING:
+                severityLog = 
+                    ANSI_STRINGIZE(ANSI_FG(ANSI_YELLOW_MINOR))
+                    "[WARNING] ";
+                break;
+            case Severity::ERROR:
+                severityLog = 
+                    ANSI_STRINGIZE(ANSI_FG(ANSI_RED_MINOR))
+                    "[ERROR] ";
+                break;
+            case Severity::FATAL:
+                severityLog = 
+                    ANSI_STRINGIZE(ANSI_FG(ANSI_RED_MINOR))
+                    "[[FATAL]] ";
+                break;
+            case Severity::INFO:
+            default:
+                break;
+        }
+        teeny::println(severityLog, args...);
+    }
 }

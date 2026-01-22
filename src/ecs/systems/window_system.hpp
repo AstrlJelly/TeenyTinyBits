@@ -6,10 +6,13 @@
 #include "ecs/components/game_window.hpp"
 
 
-struct WindowSystem : System
+namespace teeny
 {
-    SET_COMPONENT_SIGNATURE(GameWindow);
-
-    void update(ECSManager& ecs);
-    void render(ECSManager& ecs);
-};
+    struct WindowSystem : System
+    {
+        SET_COMPONENT_SIGNATURE(GameWindow);
+    
+        void update(ECSManager& ecs);
+        void render(ECSManager& ecs);
+    };
+}

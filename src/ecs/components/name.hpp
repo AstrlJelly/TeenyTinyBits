@@ -2,7 +2,10 @@
 
 #include "ecs/component.hpp"
 
-struct Name : Component
+namespace teeny
 {
-    const char* name;
-};
+    struct Name : Component
+    {
+        const char* name;
+    };
+}

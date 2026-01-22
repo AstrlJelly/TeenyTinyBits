@@ -4,8 +4,11 @@
 
 #include "ecs/component.hpp"
 
-struct Transform : Component
+namespace teeny
 {
-    glm::vec3 position;
-    glm::quat rotation;
-};
+    struct Transform : Component
+    {
+        glm::vec3 position;
+        glm::quat rotation;
+    };
+}
