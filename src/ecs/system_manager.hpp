@@ -2,7 +2,6 @@
 
 #include <array>
 #include <bitset>
-#include <print>
 
 #include "print.hpp"
 #include "component_signature.hpp"
@@ -17,7 +16,7 @@ namespace teeny
         std::array<System, MAX_SYSTEM_TYPES> registeredSystems;
     
     public:
-        void entity_signature_changed(EntityId_t entityId, ComponentSignature signature);
+        void on_entity_signature_changed(EntityId_t entityId, ComponentSignature signature);
     
         template<SystemType T>
         T& register_system()
@@ -28,6 +27,7 @@ namespace teeny
             {
                 teeny::println("The system \"{}\" was already initialized.", typeid(T).name());
                 teeny::println("Make sure to use SystemManager::get_registered_system() for existing systems!");
+                teeny::println("NOTE: Still returning existing system.");
             }
             else
             {

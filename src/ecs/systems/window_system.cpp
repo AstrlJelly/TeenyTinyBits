@@ -22,6 +22,12 @@ namespace teeny
             {
                 window.init();
             }
+            
+            if (glfwWindowShouldClose(window.window))
+            {
+                ecs.lazy_exit();
+                continue;
+            }
     
             double time = glfwGetTime();
             window.deltaTime = time - window.lastFrameTime;

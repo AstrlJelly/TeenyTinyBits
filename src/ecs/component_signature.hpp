@@ -8,15 +8,19 @@ namespace teeny
 {
     class ComponentSignature
     {
-    private:
         // can be replaced with `std::dynamic_bitset` if 'tis wished to be dynamic
-        using _ComponentBitMask_t = std::bitset<MAX_COMPONENT_TYPES>;
-        _ComponentBitMask_t mask;
+    public: using ComponentBitMask_t = std::bitset<MAX_COMPONENT_TYPES>;
+        
+    private:
+        ComponentBitMask_t mask;
+
     public:
-        // declare private type to declare private variables with public type
-        // while also not changing the formatting
-        using ComponentBitMask_t = _ComponentBitMask_t;
         // constexpr ComponentSignature();
+
+        explicit operator ComponentBitMask_t()
+        {
+            return mask;
+        }
     
         template<ComponentData... TArgs>
         [[nodiscard]] inline constexpr static ComponentSignature from_components()

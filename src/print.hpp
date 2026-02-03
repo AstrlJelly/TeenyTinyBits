@@ -1,5 +1,4 @@
 
-#include <stdlib.h>
 #include <iostream>
 #include <string>
 
@@ -38,42 +37,46 @@ namespace teeny
 {
     enum class Severity
     {
-        INFO, WARNING, ERROR, FATAL
+        INFO, IMPORTANT, WARNING, ERROR, FATAL
+    };
+
+    constexpr std::array severityTags{
+        "[INFO]",
+        
+        ANSI_STRINGIZE(ANSI_FG(ANSI_GREEN_MINOR))
+        "[[IMPORTANT]]",
+
+        ANSI_STRINGIZE(ANSI_FG(ANSI_YELLOW_MINOR))
+        "[WARNING]",
+
+        ANSI_STRINGIZE(ANSI_FG(ANSI_RED_MINOR))
+        "[ERROR]",
+
+        ANSI_STRINGIZE(ANSI_FG(ANSI_RED_MINOR))
+        "[[FATAL]]",
     };
 
     template<typename T>
-    concept Printable = requires (T t) { std::string(t); };
+    concept Printable = requires (T t) { std::cout << t; };
 
-    template<Printable... TArgs>
-    inline void println(const TArgs&... args)
+    template<char sep = ' ', Printable... TArgs>
+    const inline void println(const TArgs&... args)
     {
-        std::cout << (std::string(args) + ...) << ANSI_STRINGIZE(ANSI_RESET_MINOR) << std::endl;
+        // calls lambda for every argument
+        ([args]{
+            std::cout << args << sep;
+        }(), ...);
+
+        // todo: check the edge cases with this to make sure
+        // todo  the carriage return doesn't break things
+        // remove the last space, and reset the ansi color code
+        std::cout << "\r" ANSI_STRINGIZE(ANSI_RESET_MINOR) << std::endl;
     }
 
-    template<Printable... TArgs>
-    inline void println(Severity severity, const TArgs&... args)
+    template<char sep = ' ', Printable... TArgs>
+    const inline void println(const Severity severity = Severity::INFO, const TArgs&... args)
     {
-        std::string severityLog = "";
-        switch (severity) {
-            case Severity::WARNING:
-                severityLog = 
-                    ANSI_STRINGIZE(ANSI_FG(ANSI_YELLOW_MINOR))
-                    "[WARNING] ";
-                break;
-            case Severity::ERROR:
-                severityLog = 
-                    ANSI_STRINGIZE(ANSI_FG(ANSI_RED_MINOR))
-                    "[ERROR] ";
-                break;
-            case Severity::FATAL:
-                severityLog = 
-                    ANSI_STRINGIZE(ANSI_FG(ANSI_RED_MINOR))
-                    "[[FATAL]] ";
-                break;
-            case Severity::INFO:
-            default:
-                break;
-        }
-        teeny::println(severityLog, args...);
+        std::string severityLog = severityTags.at(static_cast<size_t>(severity));
+        teeny::println<sep>(severityLog, args...);
     }
 }

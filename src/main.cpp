@@ -1,5 +1,6 @@
 #include "ecs/components/game_window.hpp"
 #include "ecs/entity.hpp"
+#include <ios>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
@@ -12,6 +13,10 @@ using namespace teeny;
 
 int32_t main(void)
 {
+	// supposedly makes std::cout faster, as long as you don't use printf
+	// https://www.reddit.com/r/cpp/comments/y29qo4/comment/is1odfq
+	std::ios::sync_with_stdio(false);
+
 	// last i checked, the ecs manager is ~537 kb
 	// much too big for the heap!
 	ECSManager& ecs = *new ECSManager();

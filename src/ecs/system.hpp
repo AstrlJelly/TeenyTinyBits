@@ -17,15 +17,34 @@ namespace teeny
     using SystemId_t = SystemInt_t;
     constexpr SystemInt_t MAX_SYSTEM_TYPES = 0x80;
     
-    struct System
+    class System
     {
+    protected:
         ComponentSignature matchingSignature;
-        // TODO: check if an array is more efficient (memory vs cache basically)
+
+        // todo: check if an array is more efficient (memory usage vs cache hits basically)
         std::set<EntityId_t> matchingEntities;
     
-        EntityInt_t get_entity_count()
+    public:
+        inline EntityInt_t get_entity_count()
         {
             return matchingEntities.size();
+        }
+
+        void entity_signature_changed(EntityId_t entityId, ComponentSignature signature)
+        {
+            ComponentSignature::ComponentBitMask_t systemMask = this->matchingSignature.get_mask();
+            bool isSignatureMatching = (systemMask & signature.get_mask()) == systemMask;
+            bool entityInSystem = this->matchingEntities.contains(entityId);
+
+            if (isSignatureMatching && !entityInSystem)
+            {
+                this->matchingEntities.insert(entityId);
+            }
+            else if (!isSignatureMatching && entityInSystem)
+            {
+                this->matchingEntities.erase(entityId);
+            }
         }
     };
     
@@ -34,7 +53,6 @@ namespace teeny
     concept SystemType = requires {
         std::is_same_v<System, T> ||
             std::is_base_of_v<System, T>;
-        sizeof(System) == sizeof(T);
     };
     
     
@@ -49,7 +67,7 @@ namespace teeny
     {
         static SystemInt_t s_systemTypeCounter = 0;
         static SystemId_t s_systemId = s_systemTypeCounter++;
-    
+
         assert(s_systemId < MAX_SYSTEM_TYPES);
     
         return s_systemId;

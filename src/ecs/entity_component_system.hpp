@@ -11,7 +11,7 @@ namespace teeny
 {
     class ECSManager
     {
-    private:
+      private:
         EntityManager    entityManager;
         ComponentManager componentManager;
         SystemManager    systemManager;
@@ -19,7 +19,12 @@ namespace teeny
 
     public:
         bool is_running();
-        void start_exit();
+
+        /**
+        * @brief Sets the `running` variable to false, closing the program in a typical frame-loop
+        *        
+        */
+        void lazy_exit();
 
 
         // entity manager
@@ -66,7 +71,7 @@ namespace teeny
         T& add_component(EntityId_t entityId, T component = T())
         {
             auto& result = this->componentManager.add_component<T>(entityId, component);
-            this->systemManager.entity_signature_changed(entityId, get_component_signature(entityId));
+            this->systemManager.on_entity_signature_changed(entityId, get_component_signature(entityId));
             return result;
         }
         DEFINE_PLURAL_COMPONENT_FUNC_RETURN(
@@ -84,7 +89,7 @@ namespace teeny
         void remove_component(EntityId_t entityId)
         {
             this->componentManager.remove_component<T>(entityId);
-            this->systemManager.entity_signature_changed(entityId, get_component_signature(entityId));
+            this->systemManager.on_entity_signature_changed(entityId, get_component_signature(entityId));
         }
         DEFINE_PLURAL_COMPONENT_FUNC_VOID(
             remove_component, (EntityId_t entityId), (entityId))

@@ -8,7 +8,7 @@
 
 namespace teeny
 {
-    struct WindowSystem : System
+    struct WindowSystem : public System
     {
         SET_COMPONENT_SIGNATURE(GameWindow);
     
