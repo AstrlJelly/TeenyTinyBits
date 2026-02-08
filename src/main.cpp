@@ -13,7 +13,7 @@ using namespace teeny;
 
 int32_t main(void)
 {
-	// supposedly makes std::cout faster, as long as you don't use printf
+	// supposedly makes std::cout/std::print faster, as long as you don't use printf
 	// https://www.reddit.com/r/cpp/comments/y29qo4/comment/is1odfq
 	std::ios::sync_with_stdio(false);
 
