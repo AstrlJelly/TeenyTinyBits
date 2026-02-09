@@ -56,7 +56,7 @@ jobs:
         # vcpkg revision to checkout.
         revision: # optional, default is 
         # GitHub token to authenticate API requests. Recommended to use  github.token 
-        token: # optional, default is 
+        token: ${{ github.token }} # optional, default is 
         # Directory containing vcpkg.json manifest file. Cannot be used with pkgs.
         manifest-dir: # optional, default is 
         # Fetch depth for vcpkg checkout
