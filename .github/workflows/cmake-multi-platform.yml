@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}-latest
 
     strategy:
       # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations.
@@ -23,7 +23,7 @@ jobs:
       # 3. <Windows, Release, latest Clang compiler toolchain on the default runner image, default generator>
       # 4. <Windows, Release, latest GCC compiler toolchain on the default runner image, default generator>
       matrix:
-        os:         [ubuntu-latest, windows-latest]
+        os:         [ubuntu, windows]
         build_type: [Release]
         compiler:  [ {c: clang, cpp: clang++}, {c: gcc, cpp: g++} ]
 
@@ -46,7 +46,7 @@ jobs:
         # List of packages to build, separated by spaces. Cannot be used with manifest-dir
         pkgs: glfw3 libx11 wayland # optional
         # vcpkg triplet to use
-        triplet: x64
+        triplet: x64-${{ matrix.os }}
         # Extra vcpkg install command line args (optional)
         extra-args: # optional, default is 
         # Additional cache key component (optional)
