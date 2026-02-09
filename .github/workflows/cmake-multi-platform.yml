@@ -42,18 +42,20 @@ jobs:
       shell: bash
       run: if [ ${{ matrix.os }} == 'ubuntu-latest' ]; then sudo apt update && sudo apt upgrade; sudo apt install libwayland-dev libxkbcommon-dev xorg-dev; fi
 
-    - name: Setup Ninja
-      # uses: ashutoshvarma/setup-ninja@93f8b9763516f1fb9b4d9840b12d844bee17791f
-      uses: ashutoshvarma/setup-ninja@v1.1
+    - name: Install ninja-build tool
+      # You may pin to the exact commit or the version.
+      # uses: seanmiddleditch/gha-setup-ninja@3b1f8f94a2f8254bd26914c4ab9474d4f0015f67
+      uses: seanmiddleditch/gha-setup-ninja@v6
       with:
-        # Ninja version. Make sure given ninja version exists in ninja github release
-        version: 1.10.0
-        # Folder where ninja binary will be downloaded
-        dest: # optional, default is ninja_bin
-        # Override default platform detection logic. Accepted values are [mac, linux, win]
+        # Version of ninja-build to install
+        version: 1.12.1 # default is 1.12.1
+        # Override default platform with one of [win, mac, linux, winarm64, linux-aarch64]
         platform: # optional
-            
-
+        # Destination directory, will be added to PATH
+        destination: # optional, default is ninja-build
+        # Proxy server
+        http_proxy: # optional
+        
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
