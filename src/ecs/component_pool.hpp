@@ -21,7 +21,7 @@ namespace teeny
         std::array<T, ENTITY_START_CAPACITY> componentsData;
     
     public:
-        ComponentPool<T>()
+        ComponentPool()
         {
             indices = std::array<EntityInt_t, ENTITY_START_CAPACITY>();
             componentsData = std::array<T, ENTITY_START_CAPACITY>();
@@ -38,7 +38,7 @@ namespace teeny
     
         [[nodiscard]] EntityInt_t get_size()
         {
-            return componentsData.size();
+            return this->componentsData.size();
         }
     };
 }

@@ -1,11 +1,10 @@
-#include "game_window.hpp"
-
-#include <cstdint>
-
+#include "scene.hpp"
 #include "GLFW/glfw3.h"
-
-#include "print.hpp"
-
+#include "ecs/system_manager.hpp"
+#include "glad/glad.h"
+#include "glm/glm/ext/vector_float3.hpp"
+#include <cstdint>
+#include <cstdlib>
 
 void init_glfw_if_not_init()
 {
@@ -41,23 +40,15 @@ void init_glad_if_not_init()
 	}
 }
 
-void on_framebuffer_size_glfw(GLFWwindow* window, int32_t width, int32_t height)
+void on_framebuffer_size_glfw(GLFWwindow* _, int32_t width, int32_t height)
 {
     glViewport(0, 0, width, height);
 }
 
 namespace teeny
 {
-	void GameWindow::init()
-	{
-		// premature optimization? maybe.
-		// is it still unlikely if you use it right? yesss... 
-		if (this->window != nullptr) [[unlikely]]
-		{
-			teeny::println(teeny::Severity::ERROR, "Window already initialized.");
-			return;
-		}
-	
+    Scene::Scene()
+    {
 		init_glfw_if_not_init();
 	
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -83,5 +74,41 @@ namespace teeny
 		glfwSetFramebufferSizeCallback(this->window, on_framebuffer_size_glfw);
 	
 		glEnable(GL_DEPTH_TEST);
-	}
+    }
+
+    bool Scene::is_running()
+    {
+        return this->running;
+    }
+    
+    void Scene::update()
+    {
+        if (glfwWindowShouldClose(this->window))
+        {
+            this->lazy_exit();
+        }
+
+        double time = glfwGetTime();
+        this->deltaTime = time - this->lastFrameTime;
+        this->lastFrameTime = time;
+    }
+    
+    void Scene::render()
+    {
+        glfwMakeContextCurrent(this->window);
+
+        glm::vec3 clear = this->clearColor;
+        glClearColor(clear.r, clear.g, clear.b, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glfwSwapBuffers(this->window);
+        glfwPollEvents();
+    }
+
+    void Scene::lazy_exit()
+    {
+        this->running = false;
+        teeny::println(Severity::IMPORTANT, "Exiting at end of current ECS iteration");
+    }
+
 }

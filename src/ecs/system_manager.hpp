@@ -3,6 +3,7 @@
 #include <array>
 #include <bitset>
 
+#include "ecs/entity.hpp"
 #include "print.hpp"
 #include "component_signature.hpp"
 #include "system.hpp"
@@ -17,22 +18,29 @@ namespace teeny
     
     public:
         void on_entity_signature_changed(EntityId_t entityId, ComponentSignature signature);
+
+        template<SystemType T>
+        void register_entity(EntityId_t entityId)
+        {
+            T& registeredSystem = get_registered_system<T>();
+            registeredSystem.register_entity(entityId);
+        }
     
         template<SystemType T>
         T& register_system()
         {
             T& registeredSystem = get_registered_system<T>();
     
-            if (this->is_system_registered<T>())
-            {
-                teeny::println("The system \"{}\" was already initialized.", typeid(T).name());
-                teeny::println("Make sure to use SystemManager::get_registered_system() for existing systems!");
-                teeny::println("NOTE: Still returning existing system.");
-            }
-            else
+            if (!this->is_system_registered<T>())
             {
                 SystemId_t systemId = get_system_id<T>();
                 this->systemsRegisteredState.set(systemId);
+            }
+            else
+            {
+                teeny::println("The system \"", typeid(T).name(), "\" was already initialized.");
+                teeny::println("Make sure to use SystemManager::get_registered_system() for existing systems!");
+                teeny::println("NOTE: Still returning existing system.");
             }
             
             return registeredSystem;

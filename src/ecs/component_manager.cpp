@@ -1,5 +1,13 @@
 #include "component_manager.hpp"
 
+#include <array>
+#include <cstddef>
+
+#include "ecs/component.hpp"
+#include "ecs/component_pool.hpp"
+#include "ecs/component_signature.hpp"
+#include "ecs/entity.hpp"
+
 namespace teeny
 {
 	IComponentPool& ComponentManager::get_component_pool(ComponentId_t componentId)

@@ -1,4 +1,6 @@
 
+#include <array>
+#include <cstddef>
 #include <iostream>
 #include <string>
 
@@ -60,7 +62,7 @@ namespace teeny
     concept Printable = requires (T t) { std::cout << t; };
 
     template<char sep = ' ', Printable... TArgs>
-    const inline void println(const TArgs&... args)
+    inline void println(const TArgs&... args)
     {
         // calls lambda for every argument
         ([args]{
@@ -74,7 +76,7 @@ namespace teeny
     }
 
     template<char sep = ' ', Printable... TArgs>
-    const inline void println(const Severity severity = Severity::INFO, const TArgs&... args)
+    inline void println(const Severity severity = Severity::INFO, const TArgs&... args)
     {
         std::string severityLog = severityTags.at(static_cast<size_t>(severity));
         teeny::println<sep>(severityLog, args...);

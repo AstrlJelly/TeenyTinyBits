@@ -15,15 +15,11 @@ namespace teeny
         ComponentBitMask_t mask;
 
     public:
-        // constexpr ComponentSignature();
-
-        explicit operator ComponentBitMask_t()
-        {
-            return mask;
-        }
+        ComponentSignature();
+        ComponentSignature(ComponentBitMask_t mask);
     
         template<ComponentData... TArgs>
-        [[nodiscard]] inline constexpr static ComponentSignature from_components()
+        [[nodiscard]] constexpr static ComponentSignature from_components()
         {
             ComponentSignature base;
             (base.set<TArgs>(true), ...);
@@ -35,10 +31,7 @@ namespace teeny
          * 
          * @return `ComponentBitMask_t`
          */
-        [[nodiscard]] constexpr ComponentBitMask_t get_mask() const
-        {
-            return this->mask;
-        }
+        [[nodiscard]] constexpr ComponentBitMask_t get_mask() const;
     
         /**
          * @brief Tests the bit at index `componentId`
@@ -48,23 +41,17 @@ namespace teeny
          * @return `bool`, True if the index `Component` is on in mask
          */
         template<ComponentData T>
-        [[nodiscard]] constexpr inline bool at()
+        [[nodiscard]] constexpr bool at()
         {
             return this->at(get_component_id<T>());
         }
-        [[nodiscard]] constexpr inline bool at(ComponentId_t componentId)
-        {
-            return this->mask.test(componentId);
-        }
+        [[nodiscard]] constexpr bool at(ComponentId_t componentId);
     
         template<ComponentData T>
-        constexpr inline void set(bool value = true)
+        constexpr void set(bool value = true)
         {
             this->set(get_component_id<T>(), value);
         }
-        constexpr inline void set(ComponentId_t componentId, bool value = true)
-        {
-            this->mask.set(componentId, value);
-        }
+        constexpr void set(ComponentId_t componentId, bool value = true);
     };
 }

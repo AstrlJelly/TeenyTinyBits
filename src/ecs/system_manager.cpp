@@ -2,6 +2,7 @@
 #include "component_signature.hpp"
 #include "entity.hpp"
 #include "system.hpp"
+#include <cassert>
 
 namespace teeny
 {

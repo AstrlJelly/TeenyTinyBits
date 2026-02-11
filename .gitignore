@@ -27,3 +27,5 @@ build/*
 
 ### Doxygen
 docs/*
+/CMakeDoxyfile.in
+/CMakeDoxygenDefaults.cmake

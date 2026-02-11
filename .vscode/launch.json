@@ -7,7 +7,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug",
+            "name": "Clean Build (Debug)",
+            "preLaunchTask": "Clean Build (Debug)",
+            "program": "${workspaceFolder}/build/teenydemo",
+            "cwd": "${workspaceFolder}/"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Build (Debug)",
             "preLaunchTask": "Build (Debug)",
             "program": "${workspaceFolder}/build/teenydemo",
             "cwd": "${workspaceFolder}/"

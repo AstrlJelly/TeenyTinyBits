@@ -1,20 +1,50 @@
 cmake_minimum_required(VERSION 3.31)
 
-project(teeny VERSION 0.0.0)
+if (NOT DEFINED CMAKE_CXX_COMPILER)
+  set(CMAKE_C_COMPILER clang)
+  set(CMAKE_CXX_COMPILER clang++)
+endif()
 
 set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+project(teeny VERSION 0.0.0)
+
 set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include")
 set(PROJECT_SCRIPTS_DIR "${PROJECT_SOURCE_DIR}/src")
+set(DEMO_DIR "${PROJECT_SOURCE_DIR}/demo")
+set(DEMO_SCRIPTS_DIR "${DEMO_DIR}/src")
 
-file(GLOB_RECURSE PROJECT_SCRIPTS "${PROJECT_SCRIPTS_DIR}/*")
-
+file(GLOB_RECURSE PROJECT_SCRIPTS "${PROJECT_SCRIPTS_DIR}/*.cpp")
+file(GLOB_RECURSE PROJECT_HEADERS "${PROJECT_SCRIPTS_DIR}/*.hpp")
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_SCRIPTS})
 
+if(MSVC)
+  target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+else()
+  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
+endif()
+
+target_sources(${PROJECT_NAME}
+  PRIVATE ${PROJECT_SCRIPTS}
+
+  PUBLIC
+    FILE_SET HEADERS
+    BASE_DIRS
+      src
+    FILES
+      ${PROJECT_HEADERS}
+)
+
+target_include_directories(${PROJECT_NAME} PUBLIC
+    "${PROJECT_SCRIPTS_DIR}" "${PROJECT_INCLUDE_DIR}" "${PROJECT_BINARY_DIR}")
+
+# libraries
+find_package(OpenGL REQUIRED)
+
 add_subdirectory("${PROJECT_INCLUDE_DIR}/glm")
 add_subdirectory("${PROJECT_INCLUDE_DIR}/GLFW")
-find_package(OpenGL REQUIRED)
 
 set(IMGUI_DIR "${PROJECT_INCLUDE_DIR}/ImGui")
 file(GLOB IMGUI_SCRIPTS
@@ -24,15 +54,14 @@ file(GLOB IMGUI_SCRIPTS
 )
 add_library(ImGui STATIC ${IMGUI_SCRIPTS})
 target_include_directories(ImGui PUBLIC "${PROJECT_INCLUDE_DIR}")
+# target_link_libraries(ImGui PRIVATE glfw)
 
 add_library(glad STATIC "${PROJECT_INCLUDE_DIR}/glad/glad.c")
 target_include_directories(glad PUBLIC "${PROJECT_INCLUDE_DIR}")
+# end libraries
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
     glfw OpenGL::GL ImGui glad)
 
-target_include_directories(${PROJECT_NAME} PUBLIC
-    "${PROJECT_SCRIPTS_DIR}" "${PROJECT_INCLUDE_DIR}" "${PROJECT_BINARY_DIR}")
-
-add_executable(teenydemo "${PROJECT_SCRIPTS_DIR}/main.cpp")
-target_link_libraries(teenydemo ${PROJECT_NAME})
+add_executable(teenydemo "${DEMO_SCRIPTS_DIR}/main.cpp")
+target_link_libraries(teenydemo PRIVATE ${PROJECT_NAME})

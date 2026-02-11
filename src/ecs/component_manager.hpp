@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <tuple>
 
 #include "component_pool.hpp"
 #include "component_signature.hpp"

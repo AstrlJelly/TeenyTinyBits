@@ -1,5 +1,12 @@
 #pragma once
 
+#include "ecs/component_signature.hpp"
+#include "ecs/system.hpp"
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+#include "glm/glm/ext/vector_float2.hpp"
+#include "glm/glm/ext/vector_float3.hpp"
+
 #include "component_manager.hpp"
 #include "system_manager.hpp"
 #include "entity_manager.hpp"
@@ -9,16 +16,29 @@
 
 namespace teeny
 {
-    class ECSManager
+    class Scene
     {
       private:
+        GLFWwindow* window;
+        glm::vec3 clearColor = glm::vec3(0.165f, 0.165f, 0.2f);
+        double deltaTime;
+        double lastFrameTime;
+        
         EntityManager    entityManager;
         ComponentManager componentManager;
         SystemManager    systemManager;
         bool running = true;
 
+        inline constexpr static glm::vec2 DEFAULT_WINDOW_SIZE = glm::vec2(1280, 720);
+        inline constexpr static const char* DEFAULT_WINDOW_TITLE = "Teeny";
+        
     public:
+        Scene();
+
         bool is_running();
+
+        void update();
+        void render();
 
         /**
         * @brief Sets the `running` variable to false, closing the program in a typical frame-loop
@@ -71,7 +91,7 @@ namespace teeny
         T& add_component(EntityId_t entityId, T component = T())
         {
             auto& result = this->componentManager.add_component<T>(entityId, component);
-            this->systemManager.on_entity_signature_changed(entityId, get_component_signature(entityId));
+            this->systemManager.on_entity_signature_changed(entityId, this->get_component_signature(entityId));
             return result;
         }
         DEFINE_PLURAL_COMPONENT_FUNC_RETURN(
@@ -89,7 +109,7 @@ namespace teeny
         void remove_component(EntityId_t entityId)
         {
             this->componentManager.remove_component<T>(entityId);
-            this->systemManager.on_entity_signature_changed(entityId, get_component_signature(entityId));
+            this->systemManager.on_entity_signature_changed(entityId, this->get_component_signature(entityId));
         }
         DEFINE_PLURAL_COMPONENT_FUNC_VOID(
             remove_component, (EntityId_t entityId), (entityId))

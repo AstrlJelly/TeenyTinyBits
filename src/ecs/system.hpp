@@ -1,15 +1,16 @@
 #pragma once
 
+#include "ecs/component_signature.hpp"
+#include "ecs/entity.hpp"
 #include <cassert>
+#include <cstdint>
 #include <set>
 #include <type_traits>
 
-#include "component_signature.hpp"
-#include "entity.hpp"
 
 
-#define SET_COMPONENT_SIGNATURE(args...) ComponentSignature matchingSignature = \
-    ComponentSignature::from_components<args>()
+#define SET_COMPONENT_SIGNATURE(...) ComponentSignature matchingSignature = \
+    ComponentSignature::from_components<__VA_ARGS__>()
 
 namespace teeny
 {
@@ -20,32 +21,19 @@ namespace teeny
     class System
     {
     protected:
-        ComponentSignature matchingSignature;
+        ComponentSignature requiredComponents;
 
         // todo: check if an array is more efficient (memory usage vs cache hits basically)
         std::set<EntityId_t> matchingEntities;
     
     public:
-        inline EntityInt_t get_entity_count()
-        {
-            return matchingEntities.size();
-        }
+        EntityInt_t get_entity_count();
 
-        void entity_signature_changed(EntityId_t entityId, ComponentSignature signature)
-        {
-            ComponentSignature::ComponentBitMask_t systemMask = this->matchingSignature.get_mask();
-            bool isSignatureMatching = (systemMask & signature.get_mask()) == systemMask;
-            bool entityInSystem = this->matchingEntities.contains(entityId);
+        void register_entity(EntityId_t entityId);
 
-            if (isSignatureMatching && !entityInSystem)
-            {
-                this->matchingEntities.insert(entityId);
-            }
-            else if (!isSignatureMatching && entityInSystem)
-            {
-                this->matchingEntities.erase(entityId);
-            }
-        }
+        bool is_entity_in_system(EntityId_t entityId);
+
+        ComponentSignature entity_signature_changed(EntityId_t entityId, ComponentSignature signature);
     };
     
     
