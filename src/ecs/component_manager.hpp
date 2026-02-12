@@ -11,7 +11,7 @@
 
 #define DEFINE_PLURAL_COMPONENT_FUNC(returnType, funcName, defArgs, callArgs)\
     template<ComponentData... TArgs>\
-    returnType funcName##s defArgs\
+    returnType funcName defArgs\
     { return this->funcName<TArgs...> callArgs; }
 
 #define DEFINE_PLURAL_COMPONENT_FUNC_RETURN(funcName, defArgs, callArgs)\
@@ -41,7 +41,7 @@ namespace teeny
         ComponentManager();
         ~ComponentManager();
     
-        [[nodiscard]] ComponentSignature get_component_signature(EntityId_t entityId);
+        [[nodiscard]] ComponentSignature& get_component_signature(EntityId_t entityId);
     
         /**
          * @brief Get the component from inputted `entityId`
@@ -91,7 +91,7 @@ namespace teeny
         DEFINE_PLURAL_COMPONENT_FUNC_RETURN(
             get_or_add_component, (EntityId_t entityId, TArgs... components), (entityId, components...))
     
-        // TODO:     this
+        // TODO: this
         template<ComponentData T>
         void remove_component(EntityId_t entityId)
         {
@@ -104,8 +104,8 @@ namespace teeny
     
             ComponentPool<T>& componentPool = this->get_component_pool<T>();
     
-            ComponentSignature& componentSignature = componentSignatures.at(entityId);
-            componentSignature.set(entityId, true);
+            ComponentSignature& componentSignature = this->get_component_signature(entityId);
+            componentSignature.set(entityId, false);
     
             componentPool.set(entityId);
             return componentPool.at(entityId);
@@ -114,6 +114,19 @@ namespace teeny
             remove_component, (EntityId_t entityId), (entityId))
     
         /**
+         * @brief Template function to check for a component
+         * 
+         * @tparam TArgs Component type to check against
+         * @param entityId The entity id to check for
+         * @return bool True if entity contains component
+         */
+        template<ComponentData T>
+        [[nodiscard]] bool has_component(EntityId_t entityId)
+        {
+            return this->has_components<T>(entityId);
+        }
+        
+        /**
          * @brief Template function to check for 0 or more components
          * 
          * @tparam TArgs Component types to check against
@@ -121,11 +134,18 @@ namespace teeny
          * @return bool True if entity contains all components
          */
         template<ComponentData... TArgs>
-        [[nodiscard]] constexpr bool has_components(EntityId_t entityId)
+        [[nodiscard]] bool has_components(EntityId_t entityId)
         {
-            ComponentSignature entityComponents = this->get_component_signature(entityId);
             ComponentSignature componentSignature = ComponentSignature::from_components<TArgs...>();
-            return (entityComponents.get_mask() & componentSignature.get_mask()) == componentSignature.get_mask();
+            return this->has_components(entityId, componentSignature);
         }
+        /**
+         * @brief Function to check for 0 or more components
+         * 
+         * @tparam TArgs Component types to check against
+         * @param entityId The entity id to check for
+         * @return bool True if entity contains all components
+         */
+        [[nodiscard]] bool has_components(EntityId_t entityId, ComponentSignature componentSignature);
     };
 }

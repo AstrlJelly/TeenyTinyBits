@@ -85,7 +85,7 @@ namespace teeny
         {
             return this->componentManager.get_component<T>(entityId);
         }
-        DEFINE_PLURAL_COMPONENT_FUNC_RETURN(get_component, (EntityId_t entityId), (entityId))
+        DEFINE_PLURAL_COMPONENT_FUNC_RETURN(get_components, (EntityId_t entityId), (entityId))
         
         template<ComponentData T>
         T& add_component(EntityId_t entityId, T component = T())
@@ -95,7 +95,7 @@ namespace teeny
             return result;
         }
         DEFINE_PLURAL_COMPONENT_FUNC_RETURN(
-            add_component, (EntityId_t entityId, TArgs... components), (entityId, components...))
+            add_components, (EntityId_t entityId, TArgs... components), (entityId, components...))
 
         template<ComponentData T>
         [[nodiscard]] T& get_or_add_component(EntityId_t entityId, T component = T())
@@ -103,7 +103,7 @@ namespace teeny
             return this->componentManager.get_or_add_component<T>(entityId, component);
         }
         DEFINE_PLURAL_COMPONENT_FUNC_RETURN(
-            get_or_add_component, (EntityId_t entityId, TArgs... components), (entityId, components...))
+            get_or_add_components, (EntityId_t entityId, TArgs... components), (entityId, components...))
 
         template<ComponentData T>
         void remove_component(EntityId_t entityId)
@@ -112,7 +112,20 @@ namespace teeny
             this->systemManager.on_entity_signature_changed(entityId, this->get_component_signature(entityId));
         }
         DEFINE_PLURAL_COMPONENT_FUNC_VOID(
-            remove_component, (EntityId_t entityId), (entityId))
+            remove_components, (EntityId_t entityId), (entityId))
+
+        /**
+        * @brief Template function to check for a component
+        * 
+        * @tparam TArgs Component type to check against
+        * @param entityId The entity id to check for
+        * @return bool True if entity contains component
+        */
+        template<ComponentData T>
+        [[nodiscard]] bool has_component(EntityId_t entityId)
+        {
+            return this->componentManager.has_component<T>(entityId);
+        }
 
         /**
         * @brief Template function to check for 0 or more components

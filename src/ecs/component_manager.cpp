@@ -29,8 +29,14 @@ namespace teeny
 		}
 	}
 	
-	ComponentSignature ComponentManager::get_component_signature(EntityId_t entityId)
+	ComponentSignature& ComponentManager::get_component_signature(EntityId_t entityId)
 	{
 		return componentSignatures.at(entityId);
+	}
+
+	[[nodiscard]] bool ComponentManager::has_components(EntityId_t entityId, ComponentSignature componentSignature)
+	{
+		ComponentSignature entityComponents = this->get_component_signature(entityId);
+		return (entityComponents.get_mask() & componentSignature.get_mask()) == componentSignature.get_mask();
 	}
 }

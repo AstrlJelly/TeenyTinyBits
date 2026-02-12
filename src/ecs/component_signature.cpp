@@ -4,21 +4,11 @@
 
 namespace teeny
 {
-    ComponentSignature::ComponentSignature() {}
-    ComponentSignature::ComponentSignature(ComponentSignature::ComponentBitMask_t mask)
-    {
-        this->mask = mask;
-    }
-
-    /**
-        * @brief Get the bitset object
-        * 
-        * @return `ComponentBitMask_t`
-        */
-    [[nodiscard]] constexpr ComponentSignature::ComponentBitMask_t ComponentSignature::get_mask() const
-    {
-        return this->mask;
-    }
+    // /**
+    //     * @brief Get the bitset object
+    //     * 
+    //     * @return `ComponentBitMask_t`
+    //     */
     [[nodiscard]] constexpr bool ComponentSignature::at(ComponentId_t componentId)
     {
         return this->mask.test(componentId);

@@ -15,8 +15,11 @@ namespace teeny
         ComponentBitMask_t mask;
 
     public:
-        ComponentSignature();
-        ComponentSignature(ComponentBitMask_t mask);
+        constexpr ComponentSignature() {};
+        constexpr ComponentSignature(ComponentBitMask_t mask)
+        {
+            this->mask = mask;
+        }
     
         template<ComponentData... TArgs>
         [[nodiscard]] constexpr static ComponentSignature from_components()
@@ -31,7 +34,10 @@ namespace teeny
          * 
          * @return `ComponentBitMask_t`
          */
-        [[nodiscard]] constexpr ComponentBitMask_t get_mask() const;
+        [[nodiscard]] constexpr ComponentBitMask_t get_mask() const
+        {
+            return this->mask;
+        }
     
         /**
          * @brief Tests the bit at index `componentId`
