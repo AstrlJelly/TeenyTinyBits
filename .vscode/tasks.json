@@ -2,13 +2,22 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "type": "shell",
+            "label": "Create build dir",
+            "command": "mkdir -p ${workspaceFolder}/build",
+        },
+        {
             "type": "cmake",
             "label": "CMake: clean",
+            "dependsOn": [ "Create build dir" ],
+            "dependsOrder": "sequence",
             "command": "clean"
         },
         {
             "type": "cmake",
             "label": "CMake: build",
+            "dependsOn": [ "Create build dir" ],
+            "dependsOrder": "sequence",
             "command": "build",
             "group": {
                 "kind": "build",

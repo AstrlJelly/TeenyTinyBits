@@ -1,18 +1,22 @@
 ### Personal
 
 ### CMake
-CMakeLists.txt.user
-CMakeCache.txt
+# CMake*
+!CMakeLists.txt
 CMakeFiles
 CMakeScripts
+CMakeCache.txt
+CMakeUserPresets.json
+CMakeDoxyfile.in
+CMakeDoxygenDefaults.cmake
+cmake_install.cmake
+CTestTestfile.cmake
+
 Testing
 Makefile
-cmake_install.cmake
 install_manifest.txt
 compile_commands.json
-CTestTestfile.cmake
 _deps
-CMakeUserPresets.json
 build/*
 
 ### CLang
@@ -27,5 +31,3 @@ build/*
 
 ### Doxygen
 docs/*
-/CMakeDoxyfile.in
-/CMakeDoxygenDefaults.cmake

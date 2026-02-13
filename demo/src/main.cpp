@@ -9,8 +9,6 @@
 
 #include "ecs/scene.hpp"
 
-using namespace teeny;
-
 int32_t main(void)
 {
 	// supposedly makes std::cout faster, as long as you don't use printf
@@ -19,8 +17,8 @@ int32_t main(void)
 
 	// last i checked, the scene is ~537 kb
 	// much too big for the heap!
-	std::unique_ptr<Scene> scenePtr = std::make_unique<Scene>();
-	Scene& scene = *scenePtr;
+	std::unique_ptr<teeny::Scene> scenePtr = std::make_unique<teeny::Scene>();
+	teeny::Scene& scene = *scenePtr;
 
 	// initialize systems
 
